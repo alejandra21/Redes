@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 			FILE *archivoS;
 
 			archivoS = fopen(bitacoraSalida,"a");
-			fprintf(archivoS,"%s %s \n",identificador,fecha);
+			fprintf(archivoS,"%s %s",identificador,fecha);
 
 			// Se cierra el archivo.
 			fclose(archivoS);
@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
 			FILE *archivoE;
 
 			archivoE = fopen(bitacoraEntrada,"a");
-			fprintf(archivoE,"%s %s \n",identificador,fecha);
+			fprintf(archivoE,"%s %s",identificador,fecha);
 
 			// Se cierra el archivo.
 			printf("Soy entrada\n");

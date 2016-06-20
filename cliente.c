@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 	int identificador;
 	int addr_len,numbytes; /* conteo de bytes a escribir */ 
 	char *operacion;
-	char mensaje[500];
+	char mensaje[80];
 
 	time_t tiempoActual;
     char* tiempoStr;
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 	their_addr.sin_addr = *((struct in_addr *)direccionDestino->h_addr); 
 	bzero(&(their_addr.sin_zero), 8); /* pone en cero el resto */ 
 
-	sprintf(mensaje, "%d",identificador);
+	sprintf(mensaje,"%d",identificador);
 	strcat(mensaje,",");
 	strcat(mensaje,operacion);
 
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     strcat(mensaje,",");
     strcat(mensaje,tiempoStr);
 
-	printf("mensaje :%s\n", mensaje);
+	printf("mensaje :%s", mensaje);
 
 	
 	/* enviamos el mensaje */ 
