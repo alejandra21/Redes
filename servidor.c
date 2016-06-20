@@ -7,15 +7,21 @@
 #include <arpa/inet.h> 
 #include <sys/types.h> 
 #define BUFFER_LEN 1024 
+#define PUESTOS_DISP 200 
 
 int main(int argc, char *argv[])
 {
 
 	int sockfd; /* descriptor para el socket */ 
 	int serverPort;
+	int contador;
 	char *bitacoraEntrada;
 	char *bitacoraSalida;
 	char *recibido;
+	char *token;
+	char *identificador;
+	char *operacion;
+	char *fecha; 
 	struct sockaddr_in my_addr; /* direccion IP y numero de puerto local */ 
 	struct sockaddr_in their_addr; /* direccion IP y numero de puerto del cliente */
 	int addr_len, numbytes, numbytes2; 
@@ -85,18 +91,54 @@ int main(int argc, char *argv[])
 
 	/* Se reciben los datos (directamente, UDP no necesita conexión) */ 
 	addr_len = sizeof(struct sockaddr); 
-	printf("Esperando datos ....\n"); 
-	if ((numbytes=recvfrom(sockfd, buf, BUFFER_LEN, 0, (struct sockaddr *)&their_addr,
-		(socklen_t *)&addr_len)) == -1) { 
-		perror("recvfrom"); 
-		exit(3); 
-	} 
 
-	/* Se visualiza lo recibido */ 
-	printf("paquete proveniente de : %s\n",inet_ntoa(their_addr.sin_addr)); 
-	printf("longitud del paquete en bytes: %d\n",numbytes); 
-	buf[numbytes] = '\0'; 
-	printf("el paquete contiene: %s\n", buf); 
+	while(1) {
+
+		if ((numbytes=recvfrom(sockfd, buf, BUFFER_LEN, 0, (struct sockaddr *)&their_addr,
+			(socklen_t *)&addr_len)) == -1) { 
+			perror("recvfrom"); 
+			exit(3); 
+		} 
+
+		// Se divide el mensaje en tokens
+		token = strtok(buf,",");
+		contador = 0;
+		while( token != NULL )  {
+
+			// Se tiene que poner case
+			if (contador == 0){
+				identificador = token;
+			}
+			else if (contador == 1){
+
+				operacion = token;
+			}
+
+			else {
+				fecha = token;
+			}
+			printf("%s\n",token);
+			token = strtok(NULL,",");
+			contador = contador +1 ;
+
+		}
+
+		if (strcmp(operacion,"s")==0){
+
+			printf("Soy salida\n");
+
+		}
+
+		else if (strcmp(operacion,"e")==0){
+
+			printf("Soy entrada\n");
+
+		}
+
+		buf[numbytes] = '\0'; 
+		printf("el paquete contiene: %s\n", buf); 
+
+	}
 
 	/* cerramos descriptor del socket */ 
 	close(sockfd); 
