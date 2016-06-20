@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
 		} 
 
 		// Se divide el mensaje en tokens
+		buf[numbytes] = '\0'; 
 		token = strtok(buf,",");
 		contador = 0;
 		while( token != NULL )  {
@@ -125,13 +126,27 @@ int main(int argc, char *argv[])
 
 		if (strcmp(operacion,"s")==0){
 
+			FILE *archivoS;
+
+			archivoS = fopen(bitacoraSalida,"a");
+			fprintf(archivoS,"%s %s \n",identificador,fecha);
+
+			// Se cierra el archivo.
+			fclose(archivoS);
 			printf("Soy salida\n");
 
 		}
 
 		else if (strcmp(operacion,"e")==0){
 
+			FILE *archivoE;
+
+			archivoE = fopen(bitacoraEntrada,"a");
+			fprintf(archivoE,"%s %s \n",identificador,fecha);
+
+			// Se cierra el archivo.
 			printf("Soy entrada\n");
+			fclose(archivoE);
 
 		}
 
