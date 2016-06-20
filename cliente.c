@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 	bzero(&(their_addr.sin_zero), 8); /* pone en cero el resto */ 
 
 	sprintf(mensaje, "%d",identificador);
-	strcat(mensaje," ");
+	strcat(mensaje,",");
 	strcat(mensaje,operacion);
 
     /* Obtain current time. */
@@ -119,14 +119,11 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    strcat(mensaje," ");
+    strcat(mensaje,",");
     strcat(mensaje,tiempoStr);
 
 	printf("mensaje :%s\n", mensaje);
 
-/*
-	char hola[100];
-	scanf("%[^\n]s :",hola);*/
 	
 	/* enviamos el mensaje */ 
 	if ((numbytes=sendto(sockfd,mensaje,strlen(mensaje),0,
