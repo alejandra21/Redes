@@ -6,6 +6,7 @@
 #include <netdb.h> 
 #include <arpa/inet.h> 
 #include <sys/types.h> 
+#include <time.h>
 
 int main(int argc, char *argv[])
 {
@@ -14,6 +15,10 @@ int main(int argc, char *argv[])
 	int identificador;
 	int addr_len,numbytes; /* conteo de bytes a escribir */ 
 	char *operacion;
+	char mensaje[500];
+
+	time_t tiempoActual;
+    char* tiempoStr;
 
 	struct sockaddr_in their_addr; /* almacenara la direccion IP y numero de puerto del servidor */ 
 	struct hostent *direccionDestino; 
@@ -92,11 +97,39 @@ int main(int argc, char *argv[])
 	their_addr.sin_addr = *((struct in_addr *)direccionDestino->h_addr); 
 	bzero(&(their_addr.sin_zero), 8); /* pone en cero el resto */ 
 
+	sprintf(mensaje, "%d",identificador);
+	strcat(mensaje," ");
+	strcat(mensaje,operacion);
+
+    /* Obtain current time. */
+    tiempoActual = time(NULL);
+
+    if (tiempoActual == ((time_t)-1))
+    {
+        (void) fprintf(stderr, "Failure to obtain the current time.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Convert to local time format. */
+    tiempoStr = ctime(&tiempoActual);
+
+    if (tiempoStr == NULL)
+    {
+        (void) fprintf(stderr, "Failure to convert the current time.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    strcat(mensaje," ");
+    strcat(mensaje,tiempoStr);
+
+	printf("mensaje :%s\n", mensaje);
+
+/*
 	char hola[100];
-	scanf("%[^\n]s :",hola);
+	scanf("%[^\n]s :",hola);*/
 	
 	/* enviamos el mensaje */ 
-	if ((numbytes=sendto(sockfd,hola,strlen(hola),0,
+	if ((numbytes=sendto(sockfd,mensaje,strlen(mensaje),0,
 		(struct sockaddr *)&their_addr,sizeof(struct sockaddr))) == -1) { 
 		perror("sendto"); 
 		exit(2); 
