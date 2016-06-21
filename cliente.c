@@ -101,6 +101,8 @@ int main(int argc, char *argv[])
 	strcat(mensaje,",");
 	strcat(mensaje,operacion);
 
+	
+
     /* Obtain current time. */
     tiempoActual = time(NULL);
 
@@ -142,7 +144,7 @@ int main(int argc, char *argv[])
 
 	recibido[numbytes] = '\0'; 
 	printf("Mensaje del servidor : %s\n",recibido);
-	
+
 
 	/* cierro socket */ 
 	close(sockfd); 
