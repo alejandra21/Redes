@@ -22,11 +22,11 @@ int main(int argc, char *argv[])
 	int contador;
 	char *bitacoraEntrada;
 	char *bitacoraSalida;
-	char *recibido;
 	char *token;
 	char *identificador;
 	char *operacion;
 	char *fecha; 
+	char *recibido;
 	char archivoIdent[100];
 	struct sockaddr_in my_addr; /* direccion IP y numero de puerto local */ 
 	struct sockaddr_in their_addr; /* direccion IP y numero de puerto del cliente */
@@ -177,6 +177,7 @@ int main(int argc, char *argv[])
 						contadorArchivos++;
 					}
 
+
 					FILE *archivoCarros;
 					archivoCarros = fopen(archivoIdent,"w");
 					fprintf(archivoCarros,"%s",fecha);
@@ -189,6 +190,26 @@ int main(int argc, char *argv[])
 					// Se cierra el archivo.
 					printf("Soy entrada\n");
 					fclose(archivoE);
+
+					printf("Archivos %d\n",contadorArchivos);
+					if (contadorArchivos > 201){
+
+						recibido = "No hay chance";
+						remove(archivoIdent);
+					}
+
+					else {
+
+						recibido = "Hay chance";
+
+					}
+
+					if ((numbytes2=sendto(sockfd,recibido,strlen(recibido),0,
+						(struct sockaddr *)&their_addr, 
+						sizeof(struct sockaddr))) == -1) { 
+						perror("sendto"); 
+						exit(2); 
+					} 
 
 				}
 

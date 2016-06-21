@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 	int addr_len,numbytes; /* conteo de bytes a escribir */ 
 	char *operacion;
 	char mensaje[80];
-
+	char recibido[30];
 	time_t tiempoActual;
     char* tiempoStr;
 
@@ -131,6 +131,18 @@ int main(int argc, char *argv[])
 		perror("sendto"); 
 		exit(2); 
 	} 
+
+	numbytes=recvfrom(sockfd,recibido,30, 0, (struct sockaddr *)&their_addr,
+		(socklen_t *)&addr_len);
+
+	if (numbytes == -1) { 
+		perror("recvfrom"); 
+		exit(3); 
+	}
+
+	recibido[numbytes] = '\0'; 
+	printf("Mensaje del servidor : %s\n",recibido);
+	
 
 	/* cierro socket */ 
 	close(sockfd); 
