@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 					// Se verifica si se puede abrir el directorio:
 					if ((dirp = opendir("./carros")) == NULL) {
 
-						fprintf(stderr,"No se puede abrir el directorio %s\n");
+						//fprintf(stderr,"No se puede abrir el directorio %s\n");
 						strerror(errno);
 						exit(1);
 
@@ -215,6 +215,8 @@ int main(int argc, char *argv[])
 
 				buf[numbytes] = '\0'; 
 				printf("el paquete contiene: %s\n", buf);
+
+				exit(0);
 
 			}
 

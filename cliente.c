@@ -12,8 +12,9 @@ int main(int argc, char *argv[])
 {
 	int serverPort;
 	int sockfd;
-	int identificador;
-	int addr_len,numbytes; /* conteo de bytes a escribir */ 
+	int addr_len,numbytes,numbytes2; /* conteo de bytes a escribir */ 
+	int numeroIntentos;
+	char *identificador;
 	char *operacion;
 	char mensaje[80];
 	char recibido[30];
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
 
 	struct sockaddr_in their_addr; /* almacenara la direccion IP y numero de puerto del servidor */ 
 	struct hostent *direccionDestino; 
+	struct timeval timeout; 
 
 
 	/* code */
@@ -67,7 +69,7 @@ int main(int argc, char *argv[])
 				}
 
 				else if ( strcmp(argv[i],"-i") == 0){
-					identificador = atoi(argv[i+1]);
+					identificador = argv[i+1];
 
 				}
 
@@ -84,12 +86,19 @@ int main(int argc, char *argv[])
 
 	}
 
-	/* Creamos el socket */ 
+	// Se crea el socket
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) { 
 		perror("socket"); 
 		exit(2); 
 	} 
 
+	// Se configura el timeout del socket a 2 seg.     
+	timeout.tv_sec = 2;
+	timeout.tv_usec = 0;
+
+	if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,
+	            sizeof(timeout)) < 0)
+	    perror("setsockopt failed\n");
 
 	/* a donde mandar */ 
 	their_addr.sin_family = AF_INET; /* usa host byte order */ 
@@ -97,13 +106,8 @@ int main(int argc, char *argv[])
 	their_addr.sin_addr = *((struct in_addr *)direccionDestino->h_addr); 
 	bzero(&(their_addr.sin_zero), 8); /* pone en cero el resto */ 
 
-	sprintf(mensaje,"%d",identificador);
-	strcat(mensaje,",");
-	strcat(mensaje,operacion);
 
-	
-
-    /* Obtain current time. */
+	// Se calcula el tiempo actual.
     tiempoActual = time(NULL);
 
     if (tiempoActual == ((time_t)-1))
@@ -112,7 +116,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    /* Convert to local time format. */
+    // Se cambia el formato de la hora
     tiempoStr = ctime(&tiempoActual);
 
     if (tiempoStr == NULL)
@@ -121,34 +125,61 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
+    // Se arma el mensaje que se le enviara al servidor.
+    memset(mensaje, 0, sizeof mensaje); // Se limpia el arrecho de caracteres.
+    strcat(mensaje,identificador);  	// Indetificador del vehiculo
     strcat(mensaje,",");
-    strcat(mensaje,tiempoStr);
+    strcat(mensaje,operacion);			// Operacion que realizara el vehiculo
+    strcat(mensaje,",");
+    strcat(mensaje,tiempoStr);			// Hora de entrada del vehiculo.
 
 	printf("mensaje :%s", mensaje);
-
 	
-	/* enviamos el mensaje */ 
+	// Se envia el mensaje con toda la informacion del cliente al servidor
 	if ((numbytes=sendto(sockfd,mensaje,strlen(mensaje),0,
 		(struct sockaddr *)&their_addr,sizeof(struct sockaddr))) == -1) { 
 		perror("sendto"); 
 		exit(2); 
 	} 
 
-	numbytes=recvfrom(sockfd,recibido,30, 0, (struct sockaddr *)&their_addr,
+	// Se espera el mensaje del servidor.
+	numbytes2 = recvfrom(sockfd,recibido,30,0, (struct sockaddr *)&their_addr,
 		(socklen_t *)&addr_len);
 
-	if (numbytes == -1) { 
-		perror("recvfrom"); 
-		exit(3); 
+	// Si no se recibe algun mensaje del servidor despues de 2 seg se intenta
+	// enviar el mensaje 3 veces mas.
+	numeroIntentos = 1;
+	while (numbytes2 == -1 && numeroIntentos <= 3){
+
+		printf("Numero de intentos : %d\n",numeroIntentos);
+		if ((numbytes=sendto(sockfd,mensaje,strlen(mensaje),0,
+			(struct sockaddr *)&their_addr,sizeof(struct sockaddr))) == -1) { 
+			perror("sendto"); 
+			exit(2); 
+		} 
+
+		numbytes2 = recvfrom(sockfd,recibido,30,0, (struct sockaddr *)&their_addr,
+			(socklen_t *)&addr_len);
+
+		numeroIntentos = numeroIntentos + 1;
 	}
 
-	recibido[numbytes] = '\0'; 
-	printf("Mensaje del servidor : %s\n",recibido);
+	// Si hubo mas de tres intentos de conexion con el servidor entonces se 
+	// aborta la ejecucion.
+	if (numeroIntentos > 3){
+		printf("El servidor se encuentra sin conexion. \n");
+		exit(0);
+	}
+	else{
 
+		recibido[numbytes2] = '\0'; 
+		printf("Mensaje del servidor : %s\n",recibido);
+		
+	}
+	printf("Numero de intentos final %d\n",numeroIntentos);
 
-	/* cierro socket */ 
+	// Se cierra el socket
 	close(sockfd); 
-
 
 	return 0;
 }
