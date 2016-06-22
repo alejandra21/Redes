@@ -1,4 +1,4 @@
 1) Chequear ID unico.
 2) Calcular monto a pagar.
-3) Cliente intente 3 veces comunicarse con el servidor.
+3) Cliente intente 3 veces comunicarse con el servidor (LISTO).
 4) Enviar ACK de cliente a servidor.
