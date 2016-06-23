@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
 	int serverPort;
 	int contador;
 	int puestosDisponibles = 200;
+	int errorIdentificador;
 	char *bitacoraEntrada;
 	char *bitacoraSalida;
 	char *token;
@@ -128,11 +129,14 @@ int main(int argc, char *argv[])
 
 	while(1) {
 
+
 		if ((numbytes=recvfrom(sockfd, buf, BUFFER_LEN, 0, (struct sockaddr *)&their_addr,
 			(socklen_t *)&addr_len)) == -1) { 
 			perror("recvfrom"); 
 			exit(3); 
 		}
+
+		errorIdentificador = 0;
 		// Se divide el mensaje en tokens
 		buf[numbytes] = '\0'; 
 		token = strtok(buf,",");
@@ -157,19 +161,36 @@ int main(int argc, char *argv[])
 
 		}
 
+		// Se crea la ruta del archivo que contendra informacion de la fecha de 
+		// llegada del nuevo carro.
+		memset(archivoIdent, 0, sizeof archivoIdent);
+		strcat(archivoIdent,"./carros/");
+		strcat(archivoIdent,identificador);
 
-		// Falta revisar el id
-		if (strcmp(operacion,"s")==0){
+		// Se verifica si el ID del vehiculo existe (Escribir una funcion!!!)
 
-			puestosDisponibles = puestosDisponibles + 1;
+		// Si existe quiere decir que hay 
+		if ( ( (access(archivoIdent,F_OK ) != -1) && (strcmp(operacion,"e")==0) ) || ( (access(archivoIdent,F_OK ) == -1) && (strcmp(operacion,"s")==0) ) ){
+
+		    errorIdentificador = 1;
+
+		} 
+		else {
+
+			if (strcmp(operacion,"s")==0){
+
+				puestosDisponibles = puestosDisponibles + 1;
+
+			}
+
+			else if (strcmp(operacion,"e")==0){
+
+				puestosDisponibles = puestosDisponibles - 1;
+
+			}
 
 		}
 
-		else if (strcmp(operacion,"e")==0){
-
-			puestosDisponibles = puestosDisponibles - 1;
-
-		}
 
 		childpid = fork();
 		if (childpid == 0) {
@@ -177,65 +198,72 @@ int main(int argc, char *argv[])
 			printf("Soy el hijo \n");
 			printf("Puestos disponibles:  %d\n",puestosDisponibles);
 			printf("operacion %s\n",operacion);
-			if (strcmp(operacion,"s")==0){
 
-				FILE *archivoS;
+			if (errorIdentificador == 0){
 
-				archivoS = fopen(bitacoraSalida,"a");
-				fprintf(archivoS,"%s %s",identificador,fecha);
+				if (strcmp(operacion,"s")==0){
 
-				// Se cierra el archivo.
-				fclose(archivoS);
-				printf("Soy salida\n");
+					// Escribir en una funcion!!!
+					FILE *archivoS;
 
-			}
-			else if (strcmp(operacion,"e")==0){
+					archivoS = fopen(bitacoraSalida,"a");
+					fprintf(archivoS,"%s %s",identificador,fecha);
 
-				// Se crea el archivo de los identificadores de los carros.
-				memset(archivoIdent, 0, sizeof archivoIdent);
-				strcat(archivoIdent,"./carros/");
-				strcat(archivoIdent,identificador);
-
-
-				FILE *archivoCarros;
-				archivoCarros = fopen(archivoIdent,"w");
-				fprintf(archivoCarros,"%s",fecha);
-				fclose(archivoCarros);
-
-				FILE *archivoE;
-				archivoE = fopen(bitacoraEntrada,"a");
-				fprintf(archivoE,"%s %s",identificador,fecha);
-
-				// Se cierra el archivo.
-				printf("Soy entrada\n");
-				fclose(archivoE);
-
-				printf("Archivos %d\n",puestosDisponibles);
-
-				if (puestosDisponibles == 0){
-
-					recibido = "No hay chance";
-					remove(archivoIdent);
-				}
-
-				else {
-
-					recibido = "Hay chance";
+					// Se cierra el archivo.
+					fclose(archivoS);
+					printf("Soy salida\n");
+					recibido = "Usted debe pagar ... Bs.";
 
 				}
+				else if (strcmp(operacion,"e")==0){
 
-				if ((numbytes2=sendto(sockfd,recibido,strlen(recibido),0,
-					(struct sockaddr *)&their_addr, 
-					sizeof(struct sockaddr))) == -1) { 
-					perror("sendto"); 
-					exit(2); 
-				} 
+
+					// Escribir en una funcion!!!
+					FILE *archivoCarros;
+					archivoCarros = fopen(archivoIdent,"w");
+					fprintf(archivoCarros,"%s",fecha);
+					fclose(archivoCarros);
+
+					FILE *archivoE;
+					archivoE = fopen(bitacoraEntrada,"a");
+					fprintf(archivoE,"%s %s",identificador,fecha);
+
+					// Se cierra el archivo.
+					printf("Soy entrada\n");
+					fclose(archivoE);
+
+					printf("Archivos %d\n",puestosDisponibles);
+
+					if (puestosDisponibles == 0){
+
+						recibido = "No hay chance";
+						remove(archivoIdent);
+					}
+
+					else {
+
+						recibido = "Hay chance";
+
+					}
+
+
+				}
 
 			}
 
-/*			buf[numbytes] = '\0'; 
-			printf("el paquete contiene: %s\n", buf);
-*/
+			else {
+
+				recibido = "Hay un error con su ID.";
+
+			}
+
+			if ((numbytes2=sendto(sockfd,recibido,strlen(recibido),0,
+				(struct sockaddr *)&their_addr, 
+				sizeof(struct sockaddr))) == -1) { 
+				perror("sendto"); 
+				exit(2); 
+			} 
+
 			exit(0);
 
 
