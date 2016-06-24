@@ -1,13 +1,14 @@
-/*#
-# Archivo: Makefile
-#
-# Nombres:
-#	Alejandra Cordero / Carnet: 12-10645
-#	Ricardo Mena  / Carnet: 12-10872
-#
-# Ultima modificacion: 09/05/2015
-#
-#*/
+/*
+ Archivo: cliente.c
+
+ Nombres:
+	Alejandra Cordero / Carnet: 12-10645
+	Ricardo Mena  / Carnet: 12-10872
+
+ Ultima modificacion: 09/05/2015
+
+*/
+
 
 #include <stdio.h> 
 #include <stdlib.h> 
