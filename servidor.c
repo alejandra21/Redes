@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 		// Se crea la ruta del archivo que contendra informacion de la fecha de 
 		// llegada del nuevo carro.
 		memset(archivoIdent, 0, sizeof archivoIdent);
-		strcat(archivoIdent,ruta);
+		strcat(archivoIdent,"./vehiculos/");
 		strcat(archivoIdent,identificador);
 
 		errorIdentificador = verificarID(archivoIdent,operacion);
