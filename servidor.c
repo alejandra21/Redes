@@ -57,13 +57,12 @@ int calcularCosto(char *identificador) {
 	int minutos;
 	int horasTotales;
 	int minutosTotales;
-	int len;
 	time_t tiempoActual;
     struct tm *tiempoSalida;
 	FILE *archivoS;
 
 	archivoS = fopen(identificador,"r");
-	len = fscanf(archivoS," %d:%d",&horas,&minutos);
+	fscanf(archivoS," %d:%d",&horas,&minutos);
 
 	printf("Linea extraida %d : %d \n",horas,minutos);
 	fclose(archivoS);
@@ -167,6 +166,14 @@ int verificarID(char *archivoIdent,char *operacion){
 
 }
 
+void escibirBitacoraEntrada(char *bitacoraEntrada,char *identificador,char *fecha){
+
+	FILE *archivoE;
+	archivoE = fopen(bitacoraEntrada,"a");
+	fprintf(archivoE,"ID :%s ingreso en la fecha :%s",identificador,fecha);
+	fclose(archivoE);
+
+}
 void escibirBitacoraSalida(char *bitacoraSalida,char *identificador,int montoApagar){
 
 	FILE *archivoS;
@@ -190,6 +197,32 @@ void crearArchivoVehiculo(char *archivoIdent,struct tm* tiempoEntrada){
 
 }
 
+int contarVehiculosEstacionados(char *ruta){
+
+	// Declaracion de variables:
+	int contadorArchivos = 0;	// Se inicializa la variable que contara el numero de carpetas.
+	DIR *dirp;					// Variable que se utilizara para abrir el directorio.
+	struct dirent *direntp;		// Estructura que permite leer los archivos.
+	
+	// Se verifica si se puede abrir el directorio:
+	if ((dirp = opendir(ruta)) == NULL) {
+
+		//fprintf(stderr,"No se puede abrir el directorio %s\n");
+		strerror(errno);
+		exit(1);
+
+	}
+
+	// Se cuenta el numero de archivos del directorio ./carros:
+	while ((direntp = readdir(dirp)) != NULL ) {
+
+		contadorArchivos++;
+	}
+
+	return contadorArchivos - 2;
+
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -198,17 +231,19 @@ int main(int argc, char *argv[])
 	int contador;
 	int montoApagar;
 	int puestosDisponibles = 200;
+	int contadorArchivos;
 	int errorIdentificador;
+	pid_t childpid;	
 	time_t tiempoActual;
-	char* fecha;
+	char *fecha;
 	char *bitacoraEntrada;
 	char *bitacoraSalida;
 	char *token;
 	char *identificador;
 	char *operacion;
-	char *recibido;
+	char *ruta = "./vehiculos";
 	char mensajeCliente[100]; // Debe ser dinamico
-	char archivoIdent[100];
+	char archivoIdent[100];	  // Debe ser dinamico
 	struct sockaddr_in my_addr; /* direccion IP y numero de puerto local */ 
 	struct sockaddr_in their_addr; /* direccion IP y numero de puerto del cliente */
 	struct tm *tiempoEntrada;
@@ -258,9 +293,9 @@ int main(int argc, char *argv[])
 
 	}
 
-	pid_t childpid;	
-
-	mkdir("./carros", 0700);
+	// Se crea una carpeta para guardar la informacion de la hora de los
+	// vehiculos que entran.
+	mkdir(ruta, 0700);
 
 	/* se crea el socket */ 
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) { 
@@ -284,28 +319,12 @@ int main(int argc, char *argv[])
 	/* Se reciben los datos (directamente, UDP no necesita conexión) */ 
 	addr_len = sizeof(struct sockaddr); 
 
+	// Se cuenta el numero de vehiculo que ya estan estacionados.
+	contadorArchivos = contarVehiculosEstacionados(ruta);
 
-	// Declaracion de variables:
-	int contadorArchivos = 0;	// Se inicializa la variable que contara el numero de carpetas.
-	DIR *dirp;					// Variable que se utilizara para abrir el directorio.
-	struct dirent *direntp;		// Estructura que permite leer los archivos.
-	
-	// Se verifica si se puede abrir el directorio:
-	if ((dirp = opendir("./carros")) == NULL) {
-
-		//fprintf(stderr,"No se puede abrir el directorio %s\n");
-		strerror(errno);
-		exit(1);
-
-	}
-
-	// Se cuenta el numero de archivos del directorio ./carros:
-	while ((direntp = readdir(dirp)) != NULL ) {
-
-		contadorArchivos++;
-	}
-
+	// Se calcula el numero de puestos disponibles.
 	puestosDisponibles = puestosDisponibles - contadorArchivos;
+	printf("Funcion de contar directoris %d\n",puestosDisponibles);
 
 	while(1) {
 
@@ -316,8 +335,6 @@ int main(int argc, char *argv[])
 			perror("recvfrom"); 
 			exit(3); 
 		}
-
-		
 
 		// Se divide el mensaje en tokens
 		buf[numbytes] = '\0'; 
@@ -367,6 +384,7 @@ int main(int argc, char *argv[])
 		}
 
 		childpid = fork();
+
 		if (childpid == 0) {
 
 			printf("Soy el hijo \n");
@@ -393,54 +411,47 @@ int main(int argc, char *argv[])
 				else if (strcmp(operacion,"e")==0){
 
 
-					// Se calcula el tiempo actual.
-				    tiempoActual = time(NULL);
-
-				    if (tiempoActual == ((time_t)-1)){
-				        printf("Error calculando el tiempo actual.\n");
-				        exit(0);
-				    }
-
-				    // Se cambia el formato de la hora
-				    fecha = ctime(&tiempoActual);
-
-				    if (fecha == NULL){
-				    	printf("Error cambiando el formato del tiempo.\n");
-				    	exit(0);
-			
-				    }
-
-				    tiempoEntrada = localtime(&tiempoActual);
-					crearArchivoVehiculo(archivoIdent,tiempoEntrada);
-
-
-					//escibirBitacoraEntrada(bitacoraEntrada,identificador,fecha);
-					FILE *archivoE;
-					archivoE = fopen(bitacoraEntrada,"a");
-					fprintf(archivoE,"%s %s",identificador,fecha);
-
-					strcat(mensajeCliente,identificador);
-					strcat(mensajeCliente," ");
-					strcat(mensajeCliente,fecha);
-
-					// Se cierra el archivo.
-					printf("Soy mensajeCliente %s \n",mensajeCliente);
-					fclose(archivoE);
-
-					printf("Archivos %d\n",puestosDisponibles);
-
+					// Se verifica si hay puestos disponibles
 					if (puestosDisponibles == 0){
-						strcat(mensajeCliente,"No hay chance");
-					}
 
+						strcat(mensajeCliente,"No hay chance");
+
+					}
 					else {
 
-						strcat(mensajeCliente,"Hay chance");
+						// Se calcula el tiempo actual.
+					    tiempoActual = time(NULL);
 
+					    if (tiempoActual == ((time_t)-1)){
+					        printf("Error calculando el tiempo actual.\n");
+					        exit(0);
+					    }
+
+					    // Se cambia el formato de la hora
+					    fecha = ctime(&tiempoActual);
+
+					    if (fecha == NULL){
+					    	printf("Error cambiando el formato del tiempo.\n");
+					    	exit(0);
+					
+					    }
+
+					    tiempoEntrada = localtime(&tiempoActual);
+					    // Se crea el archivo del vehiculo
+						crearArchivoVehiculo(archivoIdent,tiempoEntrada);
+
+						// Se escribe en la bitacora de entrada
+						escibirBitacoraEntrada(bitacoraEntrada,identificador,fecha);
+
+						// Se arma el mensaje del cliente
+						strcat(mensajeCliente,identificador);
+						strcat(mensajeCliente," ");
+						strcat(mensajeCliente,fecha);
 
 					}
 
 				}
+
 
 			}
 
