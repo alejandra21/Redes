@@ -55,7 +55,6 @@ int main(int argc, char *argv[])
 	struct sockaddr_in their_addr; /* direccion IP y numero de puerto del cliente */
 	struct tm *tiempoEntrada;
 	int addr_len, numbytes, numbytes2; 
-	
 	char buf[BUFFER_LEN]; /* Buffer de recepción */ 
 
 
@@ -167,7 +166,7 @@ int main(int argc, char *argv[])
 		// Se crea la ruta del archivo que contendra informacion de la fecha de 
 		// llegada del nuevo carro.
 		memset(archivoIdent, 0, sizeof archivoIdent);
-		strcat(archivoIdent,"./carros/");
+		strcat(archivoIdent,ruta);
 		strcat(archivoIdent,identificador);
 
 		errorIdentificador = verificarID(archivoIdent,operacion);
@@ -196,6 +195,7 @@ int main(int argc, char *argv[])
 
 			printf("Soy el hijo \n");
 			printf("Puestos disponibles:  %d\n",puestosDisponibles);
+			printf("errorIdentificador:  %d\n",errorIdentificador);
 			printf("operacion %s\n",operacion);
 
 			if (errorIdentificador == 0){
@@ -268,6 +268,7 @@ int main(int argc, char *argv[])
 
 			}
 
+			printf("Voy a enviar \n");
 			if ((numbytes2=sendto(sockfd,mensajeCliente,strlen(mensajeCliente),0,
 				(struct sockaddr *)&their_addr, 
 				sizeof(struct sockaddr))) == -1) { 
@@ -276,7 +277,6 @@ int main(int argc, char *argv[])
 			} 
 
 			exit(0);
-
 
 		}
 
