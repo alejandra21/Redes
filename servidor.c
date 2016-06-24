@@ -120,6 +120,75 @@ int calcularCosto(char *identificador) {
 
 }
 
+int verificarID(char *archivoIdent,char *operacion){
+
+
+	/*  Descripcion de la funcion:
+			Esta funcion dado el nombre de un archivo lee todo su 
+		contenido.Si el archivo no esta vacio se crea una lista enlazada 
+		de elementos de tipo PREGUNTA, este contiene los siguientes 
+		(componentes):
+		 		-codigo: Entero que representa el codigo de una 
+		 				 pregunta.
+		 		-nivel:  Entero que representa el nivel de dificultad 
+		 				 de una pregunta.
+		 		-area:   Char que representa el area de conocimiento
+		 				 a la que pertenece una pregunta.
+		 		-pregunta: String que representa la pregunta
+		 		-opcion1:  String que representa una posible respuesta 1
+		 		-opcion2:  String que representa una posible respuesta 2
+		 		-opcion3:  String que representa una posible respuesta 3
+		 		-respuesta: Entero que representa cual es el numero
+		 					de la opcion con la respuesta correcta.
+		 		-siguiente: Apuntador al siguiente elemento de tipo 
+		 					PREGUNTA
+		 Si el archivo esta vacio la funcion solo creara un apuntador a 
+		 null. 
+		*/
+
+
+	// Se verifica si el ID del vehiculo existe (Escribir una funcion!!!)
+
+	// Si existe quiere decir que hay 
+	if ( ( (access(archivoIdent,F_OK ) != -1) && \
+		(strcmp(operacion,"e")==0) ) || ( (access(archivoIdent,F_OK ) == -1) && \
+		(strcmp(operacion,"s")==0) ) ){
+
+	    return 1;
+
+	} 
+	else {
+
+		return 0;
+
+	}
+
+
+
+}
+
+void escibirBitacoraSalida(char *bitacoraSalida,char *identificador,int montoApagar){
+
+	FILE *archivoS;
+	// Se abre el archivo
+	archivoS = fopen(bitacoraSalida,"a");
+	// Se escribe en el archivo
+	fprintf(archivoS,"Vehiculo con ID %s pago: %d Bs.\n",identificador,montoApagar);
+	// Se cierra el archivo.
+	fclose(archivoS);
+}
+
+void crearArchivoVehiculo(char *archivoIdent,struct tm* tiempoEntrada){
+
+	FILE *archivoCarros;
+	// Se abre el archivo
+	archivoCarros = fopen(archivoIdent,"w");
+	// Se escribe en el archivo
+	fprintf(archivoCarros,"%d:%d",tiempoEntrada->tm_hour, tiempoEntrada->tm_min);
+	// Se cierra el archivo.
+	fclose(archivoCarros);
+
+}
 
 int main(int argc, char *argv[])
 {
@@ -127,6 +196,7 @@ int main(int argc, char *argv[])
 	int sockfd; /* descriptor para el socket */ 
 	int serverPort;
 	int contador;
+	int montoApagar;
 	int puestosDisponibles = 200;
 	int errorIdentificador;
 	time_t tiempoActual;
@@ -239,7 +309,6 @@ int main(int argc, char *argv[])
 
 	while(1) {
 
-
 		if ((numbytes=recvfrom(sockfd, buf, BUFFER_LEN, 0,
 			(struct sockaddr *)&their_addr,
 			(socklen_t *)&addr_len)) == -1) { 
@@ -248,7 +317,7 @@ int main(int argc, char *argv[])
 			exit(3); 
 		}
 
-		errorIdentificador = 0;
+		
 
 		// Se divide el mensaje en tokens
 		buf[numbytes] = '\0'; 
@@ -277,17 +346,11 @@ int main(int argc, char *argv[])
 		strcat(archivoIdent,"./carros/");
 		strcat(archivoIdent,identificador);
 
-		// Se verifica si el ID del vehiculo existe (Escribir una funcion!!!)
+		errorIdentificador = verificarID(archivoIdent,operacion);
 
-		// Si existe quiere decir que hay 
-		if ( ( (access(archivoIdent,F_OK ) != -1) && \
-			(strcmp(operacion,"e")==0) ) || ( (access(archivoIdent,F_OK ) == -1) && \
-			(strcmp(operacion,"s")==0) ) ){
-
-		    errorIdentificador = 1;
-
-		} 
-		else {
+		// Despues de verificar si existe un erro con el ID se incrementa
+		// o se decrementa el numero de puestos disponibles.
+		if (errorIdentificador == 0 ){
 
 			if (strcmp(operacion,"s")==0){
 
@@ -303,7 +366,6 @@ int main(int argc, char *argv[])
 
 		}
 
-
 		childpid = fork();
 		if (childpid == 0) {
 
@@ -316,18 +378,9 @@ int main(int argc, char *argv[])
 				memset(mensajeCliente, 0, sizeof mensajeCliente);
 				if (strcmp(operacion,"s")==0){
 
-					// Escribir en una funcion!!!
-					FILE *archivoS;
-					int montoApagar;
-
 					montoApagar = calcularCosto(archivoIdent);
+					escibirBitacoraSalida(bitacoraSalida,identificador,montoApagar);
 
-					printf("Monto a pagar %d\n",montoApagar);
-					archivoS = fopen(bitacoraSalida,"a");
-					fprintf(archivoS,"%s monto a pagar: %d Bs.\n",identificador,montoApagar);
-			
-					// Se cierra el archivo.
-					fclose(archivoS);
 					printf("Soy salida\n");
 					strcat(mensajeCliente,"Usted debe pagar ");
 					sprintf(mensajeCliente,"%d",montoApagar);
@@ -343,33 +396,25 @@ int main(int argc, char *argv[])
 					// Se calcula el tiempo actual.
 				    tiempoActual = time(NULL);
 
-				    if (tiempoActual == ((time_t)-1))
-				    {
-				        (void) fprintf(stderr, "Failure to obtain the current time.\n");
-				        exit(EXIT_FAILURE);
+				    if (tiempoActual == ((time_t)-1)){
+				        printf("Error calculando el tiempo actual.\n");
+				        exit(0);
 				    }
 
-				    printf("Tiempo actual %ld \n",tiempoActual);
 				    // Se cambia el formato de la hora
 				    fecha = ctime(&tiempoActual);
 
-				    if (fecha == NULL)
-				    {
-				        (void) fprintf(stderr, "Failure to convert the current time.\n");
-				        exit(EXIT_FAILURE);
+				    if (fecha == NULL){
+				    	printf("Error cambiando el formato del tiempo.\n");
+				    	exit(0);
+			
 				    }
 
 				    tiempoEntrada = localtime(&tiempoActual);
-				    /*printf("The time is %.2d:%.2d:%.2d\n", 
-				        tiempoEntrada->tm_hour, tiempoEntrada->tm_min, tiempoSalida->tm_sec );*/
+					crearArchivoVehiculo(archivoIdent,tiempoEntrada);
 
 
-					// Escribir en una funcion!!!
-					FILE *archivoCarros;
-					archivoCarros = fopen(archivoIdent,"w");
-					fprintf(archivoCarros,"%d:%d",tiempoEntrada->tm_hour, tiempoEntrada->tm_min);
-					fclose(archivoCarros);
-
+					//escibirBitacoraEntrada(bitacoraEntrada,identificador,fecha);
 					FILE *archivoE;
 					archivoE = fopen(bitacoraEntrada,"a");
 					fprintf(archivoE,"%s %s",identificador,fecha);
@@ -394,7 +439,6 @@ int main(int argc, char *argv[])
 
 
 					}
-
 
 				}
 
