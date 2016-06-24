@@ -1,3 +1,14 @@
+/*#
+# Archivo: Makefile
+#
+# Nombres:
+#	Alejandra Cordero / Carnet: 12-10645
+#	Ricardo Mena  / Carnet: 12-10872
+#
+# Ultima modificacion: 09/05/2015
+#
+#*/
+
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <errno.h> 
@@ -18,8 +29,6 @@ int main(int argc, char *argv[])
 	char *operacion;
 	char mensaje[80];
 	char recibido[30];
-	time_t tiempoActual;
-    char* tiempoStr;
 
 	struct sockaddr_in their_addr; /* almacenara la direccion IP y numero de puerto del servidor */ 
 	struct hostent *direccionDestino; 
@@ -107,33 +116,13 @@ int main(int argc, char *argv[])
 	bzero(&(their_addr.sin_zero), 8); /* pone en cero el resto */ 
 
 
-	// Se calcula el tiempo actual.
-    tiempoActual = time(NULL);
-
-    if (tiempoActual == ((time_t)-1))
-    {
-        (void) fprintf(stderr, "Failure to obtain the current time.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    // Se cambia el formato de la hora
-    tiempoStr = ctime(&tiempoActual);
-
-    if (tiempoStr == NULL)
-    {
-        (void) fprintf(stderr, "Failure to convert the current time.\n");
-        exit(EXIT_FAILURE);
-    }
-
     // Se arma el mensaje que se le enviara al servidor.
     memset(mensaje, 0, sizeof mensaje); // Se limpia el arrecho de caracteres.
     strcat(mensaje,identificador);  	// Indetificador del vehiculo
     strcat(mensaje,",");
     strcat(mensaje,operacion);			// Operacion que realizara el vehiculo
-    strcat(mensaje,",");
-    strcat(mensaje,tiempoStr);			// Hora de entrada del vehiculo.
 
-	printf("mensaje :%s", mensaje);
+	printf("mensaje :%s \n", mensaje);
 	
 	// Se envia el mensaje con toda la informacion del cliente al servidor
 	if ((numbytes=sendto(sockfd,mensaje,strlen(mensaje),0,

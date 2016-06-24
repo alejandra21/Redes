@@ -1,3 +1,15 @@
+/*#
+# Archivo: Makefile
+#
+# Nombres:
+#	Alejandra Cordero / Carnet: 12-10645
+#	Ricardo Mena  / Carnet: 12-10872
+#
+# Ultima modificacion: 09/05/2015
+#
+#*/
+
+
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <errno.h> 
@@ -11,6 +23,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h> 
+#include <fcntl.h>
+#include <time.h>
 #define BUFFER_LEN 1024 
 #define PUESTOS_DISP 200 
 
@@ -22,13 +36,15 @@ int main(int argc, char *argv[])
 	int contador;
 	int puestosDisponibles = 200;
 	int errorIdentificador;
+	time_t tiempoActual;
+	char* fecha;
 	char *bitacoraEntrada;
 	char *bitacoraSalida;
 	char *token;
 	char *identificador;
 	char *operacion;
-	char *fecha; 
 	char *recibido;
+	char mensajeCliente[100]; // Debe ser dinamico
 	char archivoIdent[100];
 	struct sockaddr_in my_addr; /* direccion IP y numero de puerto local */ 
 	struct sockaddr_in their_addr; /* direccion IP y numero de puerto del cliente */
@@ -119,7 +135,7 @@ int main(int argc, char *argv[])
 
 	}
 
-	// Se cuenta el numero de archivos del directorio:
+	// Se cuenta el numero de archivos del directorio ./carros:
 	while ((direntp = readdir(dirp)) != NULL ) {
 
 		contadorArchivos++;
@@ -130,13 +146,16 @@ int main(int argc, char *argv[])
 	while(1) {
 
 
-		if ((numbytes=recvfrom(sockfd, buf, BUFFER_LEN, 0, (struct sockaddr *)&their_addr,
+		if ((numbytes=recvfrom(sockfd, buf, BUFFER_LEN, 0,
+			(struct sockaddr *)&their_addr,
 			(socklen_t *)&addr_len)) == -1) { 
+
 			perror("recvfrom"); 
 			exit(3); 
 		}
 
 		errorIdentificador = 0;
+
 		// Se divide el mensaje en tokens
 		buf[numbytes] = '\0'; 
 		token = strtok(buf,",");
@@ -152,9 +171,6 @@ int main(int argc, char *argv[])
 				operacion = token;
 			}
 
-			else {
-				fecha = token;
-			}
 			printf("%s\n",token);
 			token = strtok(NULL,",");
 			contador = contador +1 ;
@@ -170,7 +186,9 @@ int main(int argc, char *argv[])
 		// Se verifica si el ID del vehiculo existe (Escribir una funcion!!!)
 
 		// Si existe quiere decir que hay 
-		if ( ( (access(archivoIdent,F_OK ) != -1) && (strcmp(operacion,"e")==0) ) || ( (access(archivoIdent,F_OK ) == -1) && (strcmp(operacion,"s")==0) ) ){
+		if ( ( (access(archivoIdent,F_OK ) != -1) && \
+			(strcmp(operacion,"e")==0) ) || ( (access(archivoIdent,F_OK ) == -1) && \
+			(strcmp(operacion,"s")==0) ) ){
 
 		    errorIdentificador = 1;
 
@@ -201,48 +219,86 @@ int main(int argc, char *argv[])
 
 			if (errorIdentificador == 0){
 
+				memset(mensajeCliente, 0, sizeof mensajeCliente);
 				if (strcmp(operacion,"s")==0){
 
 					// Escribir en una funcion!!!
 					FILE *archivoS;
+	/*				int line;
+					int len;
+					archivoS = fopen(archivoIdent,"r");
+
+					len = fscanf(archivoS," %d",&line);
+					printf("Linea %d\n",len);
+
+					printf("Linea extraida %d \n",line);
+					fclose(archivoS);*/
+
 
 					archivoS = fopen(bitacoraSalida,"a");
-					fprintf(archivoS,"%s %s",identificador,fecha);
-
+					fprintf(archivoS,"%s ",identificador);
+			
 					// Se cierra el archivo.
 					fclose(archivoS);
 					printf("Soy salida\n");
-					recibido = "Usted debe pagar ... Bs.";
+					strcat(mensajeCliente,"Usted debe pagar ");
+					strcat(mensajeCliente,"30 Bs.");
+				
+					remove(archivoIdent);
+
 
 				}
 				else if (strcmp(operacion,"e")==0){
 
 
+					// Se calcula el tiempo actual.
+				    tiempoActual = time(NULL);
+
+				    if (tiempoActual == ((time_t)-1))
+				    {
+				        (void) fprintf(stderr, "Failure to obtain the current time.\n");
+				        exit(EXIT_FAILURE);
+				    }
+
+				    printf("Tiempo actual %ld \n",tiempoActual);
+				    // Se cambia el formato de la hora
+				    fecha = ctime(&tiempoActual);
+
+				    if (fecha == NULL)
+				    {
+				        (void) fprintf(stderr, "Failure to convert the current time.\n");
+				        exit(EXIT_FAILURE);
+				    }
+
+				    printf(" fecha %s\n",fecha);
 					// Escribir en una funcion!!!
 					FILE *archivoCarros;
 					archivoCarros = fopen(archivoIdent,"w");
-					fprintf(archivoCarros,"%s",fecha);
+					fprintf(archivoCarros,"%ld",tiempoActual);
 					fclose(archivoCarros);
 
 					FILE *archivoE;
 					archivoE = fopen(bitacoraEntrada,"a");
 					fprintf(archivoE,"%s %s",identificador,fecha);
 
+					strcat(mensajeCliente,identificador);
+					strcat(mensajeCliente," ");
+					strcat(mensajeCliente,fecha);
+
 					// Se cierra el archivo.
-					printf("Soy entrada\n");
+					printf("Soy mensajeCliente %s \n",mensajeCliente);
 					fclose(archivoE);
 
 					printf("Archivos %d\n",puestosDisponibles);
 
 					if (puestosDisponibles == 0){
-
-						recibido = "No hay chance";
-						remove(archivoIdent);
+						strcat(mensajeCliente,"No hay chance");
 					}
 
 					else {
 
-						recibido = "Hay chance";
+						strcat(mensajeCliente,"Hay chance");
+
 
 					}
 
@@ -253,11 +309,11 @@ int main(int argc, char *argv[])
 
 			else {
 
-				recibido = "Hay un error con su ID.";
+				strcat(mensajeCliente,"Hay un error con su ID.");
 
 			}
 
-			if ((numbytes2=sendto(sockfd,recibido,strlen(recibido),0,
+			if ((numbytes2=sendto(sockfd,mensajeCliente,strlen(mensajeCliente),0,
 				(struct sockaddr *)&their_addr, 
 				sizeof(struct sockaddr))) == -1) { 
 				perror("sendto"); 
