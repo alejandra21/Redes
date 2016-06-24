@@ -28,6 +28,99 @@
 #define BUFFER_LEN 1024 
 #define PUESTOS_DISP 200 
 
+int calcularCosto(char *identificador) {
+
+	/*  Descripcion de la funcion:
+			Esta funcion dado el nombre de un archivo lee todo su 
+		contenido.Si el archivo no esta vacio se crea una lista enlazada 
+		de elementos de tipo PREGUNTA, este contiene los siguientes 
+		(componentes):
+		 		-codigo: Entero que representa el codigo de una 
+		 				 pregunta.
+		 		-nivel:  Entero que representa el nivel de dificultad 
+		 				 de una pregunta.
+		 		-area:   Char que representa el area de conocimiento
+		 				 a la que pertenece una pregunta.
+		 		-pregunta: String que representa la pregunta
+		 		-opcion1:  String que representa una posible respuesta 1
+		 		-opcion2:  String que representa una posible respuesta 2
+		 		-opcion3:  String que representa una posible respuesta 3
+		 		-respuesta: Entero que representa cual es el numero
+		 					de la opcion con la respuesta correcta.
+		 		-siguiente: Apuntador al siguiente elemento de tipo 
+		 					PREGUNTA
+		 Si el archivo esta vacio la funcion solo creara un apuntador a 
+		 null. 
+		*/
+
+	int horas;
+	int minutos;
+	int horasTotales;
+	int minutosTotales;
+	int len;
+	time_t tiempoActual;
+    struct tm *tiempoSalida;
+	FILE *archivoS;
+
+	archivoS = fopen(identificador,"r");
+	len = fscanf(archivoS," %d:%d",&horas,&minutos);
+
+	printf("Linea extraida %d : %d \n",horas,minutos);
+	fclose(archivoS);
+
+	// Se calcula el tiempo actual.
+    tiempoActual = time(NULL);
+
+    if (tiempoActual == ((time_t)-1))
+    {
+        printf("Error al obtener hora actual.\n");
+        exit(0);
+    }
+
+    tiempoSalida = localtime( &tiempoActual);
+    horasTotales =  tiempoSalida->tm_hour - horas;
+    minutosTotales = tiempoSalida->tm_min - minutos;
+
+
+    printf("Hora de salida: %.2d %.2d\n", 
+        tiempoSalida->tm_hour, tiempoSalida->tm_min);
+ 
+
+    if (minutosTotales < 0 ){
+    	minutosTotales = 60 + minutosTotales;
+
+    	if (horasTotales != 0){
+    		horasTotales = horasTotales - 1 ;
+    	}
+    }
+
+    if (horasTotales < 0){
+
+    	horasTotales = horasTotales + 24;
+    }
+
+    printf("El tiempo del carro es: %.2d %.2d\n", 
+        horasTotales, minutosTotales);
+
+    if (horasTotales == 0) {
+
+    	return 80;
+    }
+    else {
+
+    	if (minutosTotales > 0 ) {
+
+    		return 80*horasTotales + 30;
+    	}
+    	else {
+
+    		return 80*horasTotales;
+    	}
+    }
+
+}
+
+
 int main(int argc, char *argv[])
 {
 
@@ -48,6 +141,7 @@ int main(int argc, char *argv[])
 	char archivoIdent[100];
 	struct sockaddr_in my_addr; /* direccion IP y numero de puerto local */ 
 	struct sockaddr_in their_addr; /* direccion IP y numero de puerto del cliente */
+	struct tm *tiempoEntrada;
 	int addr_len, numbytes, numbytes2; 
 	
 	char buf[BUFFER_LEN]; /* Buffer de recepción */ 
@@ -224,27 +318,22 @@ int main(int argc, char *argv[])
 
 					// Escribir en una funcion!!!
 					FILE *archivoS;
-	/*				int line;
-					int len;
-					archivoS = fopen(archivoIdent,"r");
+					int montoApagar;
 
-					len = fscanf(archivoS," %d",&line);
-					printf("Linea %d\n",len);
+					montoApagar = calcularCosto(archivoIdent);
 
-					printf("Linea extraida %d \n",line);
-					fclose(archivoS);*/
-
-
+					printf("Monto a pagar %d\n",montoApagar);
 					archivoS = fopen(bitacoraSalida,"a");
-					fprintf(archivoS,"%s ",identificador);
+					fprintf(archivoS,"%s monto a pagar: %d Bs.\n",identificador,montoApagar);
 			
 					// Se cierra el archivo.
 					fclose(archivoS);
 					printf("Soy salida\n");
 					strcat(mensajeCliente,"Usted debe pagar ");
-					strcat(mensajeCliente,"30 Bs.");
+					sprintf(mensajeCliente,"%d",montoApagar);
+					strcat(mensajeCliente," Bs.");
 				
-					remove(archivoIdent);
+					//remove(archivoIdent);
 
 
 				}
@@ -270,11 +359,15 @@ int main(int argc, char *argv[])
 				        exit(EXIT_FAILURE);
 				    }
 
-				    printf(" fecha %s\n",fecha);
+				    tiempoEntrada = localtime(&tiempoActual);
+				    /*printf("The time is %.2d:%.2d:%.2d\n", 
+				        tiempoEntrada->tm_hour, tiempoEntrada->tm_min, tiempoSalida->tm_sec );*/
+
+
 					// Escribir en una funcion!!!
 					FILE *archivoCarros;
 					archivoCarros = fopen(archivoIdent,"w");
-					fprintf(archivoCarros,"%ld",tiempoActual);
+					fprintf(archivoCarros,"%d:%d",tiempoEntrada->tm_hour, tiempoEntrada->tm_min);
 					fclose(archivoCarros);
 
 					FILE *archivoE;
