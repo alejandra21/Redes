@@ -1,13 +1,13 @@
-/*#
-# Archivo: Makefile
-#
-# Nombres:
-#	Alejandra Cordero / Carnet: 12-10645
-#	Ricardo Mena  / Carnet: 12-10872
-#
-# Ultima modificacion: 09/05/2015
-#
-#*/
+/*
+ Archivo: servidor.c
+
+ Nombres:
+	Alejandra Cordero / Carnet: 12-10645
+	Ricardo Mena  / Carnet: 12-10872
+
+ Ultima modificacion: 09/05/2015
+
+*/
 
 
 #include <stdio.h> 
@@ -25,203 +25,10 @@
 #include <dirent.h> 
 #include <fcntl.h>
 #include <time.h>
+#include "lib_servidor.h"
 #define BUFFER_LEN 1024 
 #define PUESTOS_DISP 200 
 
-int calcularCosto(char *identificador) {
-
-	/*  Descripcion de la funcion:
-			Esta funcion dado el nombre de un archivo lee todo su 
-		contenido.Si el archivo no esta vacio se crea una lista enlazada 
-		de elementos de tipo PREGUNTA, este contiene los siguientes 
-		(componentes):
-		 		-codigo: Entero que representa el codigo de una 
-		 				 pregunta.
-		 		-nivel:  Entero que representa el nivel de dificultad 
-		 				 de una pregunta.
-		 		-area:   Char que representa el area de conocimiento
-		 				 a la que pertenece una pregunta.
-		 		-pregunta: String que representa la pregunta
-		 		-opcion1:  String que representa una posible respuesta 1
-		 		-opcion2:  String que representa una posible respuesta 2
-		 		-opcion3:  String que representa una posible respuesta 3
-		 		-respuesta: Entero que representa cual es el numero
-		 					de la opcion con la respuesta correcta.
-		 		-siguiente: Apuntador al siguiente elemento de tipo 
-		 					PREGUNTA
-		 Si el archivo esta vacio la funcion solo creara un apuntador a 
-		 null. 
-		*/
-
-	int horas;
-	int minutos;
-	int horasTotales;
-	int minutosTotales;
-	time_t tiempoActual;
-    struct tm *tiempoSalida;
-	FILE *archivoS;
-
-	archivoS = fopen(identificador,"r");
-	fscanf(archivoS," %d:%d",&horas,&minutos);
-
-	printf("Linea extraida %d : %d \n",horas,minutos);
-	fclose(archivoS);
-
-	// Se calcula el tiempo actual.
-    tiempoActual = time(NULL);
-
-    if (tiempoActual == ((time_t)-1))
-    {
-        printf("Error al obtener hora actual.\n");
-        exit(0);
-    }
-
-    tiempoSalida = localtime( &tiempoActual);
-    horasTotales =  tiempoSalida->tm_hour - horas;
-    minutosTotales = tiempoSalida->tm_min - minutos;
-
-
-    printf("Hora de salida: %.2d %.2d\n", 
-        tiempoSalida->tm_hour, tiempoSalida->tm_min);
- 
-
-    if (minutosTotales < 0 ){
-    	minutosTotales = 60 + minutosTotales;
-
-    	if (horasTotales != 0){
-    		horasTotales = horasTotales - 1 ;
-    	}
-    }
-
-    if (horasTotales < 0){
-
-    	horasTotales = horasTotales + 24;
-    }
-
-    printf("El tiempo del carro es: %.2d %.2d\n", 
-        horasTotales, minutosTotales);
-
-    if (horasTotales == 0) {
-
-    	return 80;
-    }
-    else {
-
-    	if (minutosTotales > 0 ) {
-
-    		return 80*horasTotales + 30;
-    	}
-    	else {
-
-    		return 80*horasTotales;
-    	}
-    }
-
-}
-
-int verificarID(char *archivoIdent,char *operacion){
-
-
-	/*  Descripcion de la funcion:
-			Esta funcion dado el nombre de un archivo lee todo su 
-		contenido.Si el archivo no esta vacio se crea una lista enlazada 
-		de elementos de tipo PREGUNTA, este contiene los siguientes 
-		(componentes):
-		 		-codigo: Entero que representa el codigo de una 
-		 				 pregunta.
-		 		-nivel:  Entero que representa el nivel de dificultad 
-		 				 de una pregunta.
-		 		-area:   Char que representa el area de conocimiento
-		 				 a la que pertenece una pregunta.
-		 		-pregunta: String que representa la pregunta
-		 		-opcion1:  String que representa una posible respuesta 1
-		 		-opcion2:  String que representa una posible respuesta 2
-		 		-opcion3:  String que representa una posible respuesta 3
-		 		-respuesta: Entero que representa cual es el numero
-		 					de la opcion con la respuesta correcta.
-		 		-siguiente: Apuntador al siguiente elemento de tipo 
-		 					PREGUNTA
-		 Si el archivo esta vacio la funcion solo creara un apuntador a 
-		 null. 
-		*/
-
-
-	// Se verifica si el ID del vehiculo existe (Escribir una funcion!!!)
-
-	// Si existe quiere decir que hay 
-	if ( ( (access(archivoIdent,F_OK ) != -1) && \
-		(strcmp(operacion,"e")==0) ) || ( (access(archivoIdent,F_OK ) == -1) && \
-		(strcmp(operacion,"s")==0) ) ){
-
-	    return 1;
-
-	} 
-	else {
-
-		return 0;
-
-	}
-
-
-
-}
-
-void escibirBitacoraEntrada(char *bitacoraEntrada,char *identificador,char *fecha){
-
-	FILE *archivoE;
-	archivoE = fopen(bitacoraEntrada,"a");
-	fprintf(archivoE,"ID :%s ingreso en la fecha :%s",identificador,fecha);
-	fclose(archivoE);
-
-}
-void escibirBitacoraSalida(char *bitacoraSalida,char *identificador,int montoApagar){
-
-	FILE *archivoS;
-	// Se abre el archivo
-	archivoS = fopen(bitacoraSalida,"a");
-	// Se escribe en el archivo
-	fprintf(archivoS,"Vehiculo con ID %s pago: %d Bs.\n",identificador,montoApagar);
-	// Se cierra el archivo.
-	fclose(archivoS);
-}
-
-void crearArchivoVehiculo(char *archivoIdent,struct tm* tiempoEntrada){
-
-	FILE *archivoCarros;
-	// Se abre el archivo
-	archivoCarros = fopen(archivoIdent,"w");
-	// Se escribe en el archivo
-	fprintf(archivoCarros,"%d:%d",tiempoEntrada->tm_hour, tiempoEntrada->tm_min);
-	// Se cierra el archivo.
-	fclose(archivoCarros);
-
-}
-
-int contarVehiculosEstacionados(char *ruta){
-
-	// Declaracion de variables:
-	int contadorArchivos = 0;	// Se inicializa la variable que contara el numero de carpetas.
-	DIR *dirp;					// Variable que se utilizara para abrir el directorio.
-	struct dirent *direntp;		// Estructura que permite leer los archivos.
-	
-	// Se verifica si se puede abrir el directorio:
-	if ((dirp = opendir(ruta)) == NULL) {
-
-		//fprintf(stderr,"No se puede abrir el directorio %s\n");
-		strerror(errno);
-		exit(1);
-
-	}
-
-	// Se cuenta el numero de archivos del directorio ./carros:
-	while ((direntp = readdir(dirp)) != NULL ) {
-
-		contadorArchivos++;
-	}
-
-	return contadorArchivos - 2;
-
-}
 
 int main(int argc, char *argv[])
 {

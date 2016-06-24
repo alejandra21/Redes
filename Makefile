@@ -9,9 +9,12 @@
 #
 #
 
-Main:
+all:
 	gcc -Wall -g cliente.c -o sem_cli
-	gcc -Wall -g servidor.c -o sem_srv
+	gcc -Wall -g servidor.c lib_servidor.c -o sem_srv
+
+sem_srv.o: servidor.c lib_servidor.h
+	gcc -c servidor.c
 
 clean:
 	rm sem_cli
