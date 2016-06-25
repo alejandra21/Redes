@@ -5,7 +5,7 @@
 	Alejandra Cordero / Carnet: 12-10645
 	Ricardo Mena  / Carnet: 12-10872
 
- Ultima modificacion: 09/05/2015
+ Ultima modificacion: 24/06/2016
 
 */
 
@@ -92,8 +92,7 @@ int calcularCosto(char *identificador) {
 
 	    if (diasTotales < 0){
 
-	    	if ( (mes == 0) | (mes == 2) | (mes == 4) | (mes == 6) |\
-	    	 (mes == 7) | (mes == 9) | (mes == 11) ) {
+	    	if ( (mes == 0) | (mes == 2) | (mes == 4) | (mes == 6) | (mes == 7) | (mes == 9) | (mes == 11) ) {
 
 	    		diasTotales = 31 + diasTotales;
 	    	}
@@ -125,8 +124,6 @@ int calcularCosto(char *identificador) {
 
     	horasTotales = horasTotales + 24;
     }
-
-        horasTotales, minutosTotales);
 
 	// Se calcula el monto a pagar
     if (horasTotales == 0 && diasTotales == 0) {
@@ -195,15 +192,25 @@ void escibirBitacoraEntrada(char *bitacoraEntrada,char *identificador,char *fech
 
 	/*  Descripcion de la funcion:
 
+			Esta funcion dada la ruta de un archivo escribe en el un ID y una 
+		fecha.
+
 		Parametros de entrada:
 
+			- bitacoraEntrada: Ruta del archivo en el cual se escribira
+			- identificador : ID que se escribira en el archivo.
+			- fecha: Fecha que se escribira en el archivo
+
 		Parametros de salida:
+
+			- Ninguno.
 	 
 	*/
 
 	// Declaracion de variables:
 	FILE *archivoE;
 
+	// Se abre y se escribe en el archivo.
 	archivoE = fopen(bitacoraEntrada,"a");
 	fprintf(archivoE,"ID :%s ingreso en la fecha :%s",identificador,fecha);
 	fclose(archivoE);
@@ -218,9 +225,18 @@ void escibirBitacoraSalida(char *bitacoraSalida,char *identificador,int montoApa
 
 	/*  Descripcion de la funcion:
 
+			Esta funcion dada la ruta de un archivo escribe en el un ID y un 
+		monto.
+
 		Parametros de entrada:
 
+			- bitacoraSalida: Ruta del archivo en el cual se escribira
+			- identificador : ID que se escribira en el archivo.
+			- montoApagar: Monto que se escribira en el archivo
+
 		Parametros de salida:
+
+			- Ninguno.
 	 
 	*/
 	// Declaracion de variables:
@@ -241,9 +257,19 @@ void crearArchivoVehiculo(char *archivoIdent,struct tm* tiempoEntrada){
 
 	/*  Descripcion de la funcion:
 
+			Dada el nombre  y una estructura de tiempo esta 
+		funcion crea un archivo con el nombre dado y escribe sobre este la fecha 
+		actual del sistema
+
 		Parametros de entrada:
 
+			- archivoIdent : Nombre del archivo a crear
+			- tiempoEntrada : Estructura de tiempo que almacena el tiempo
+							  actual del sistema.
+
 		Parametros de salida:
+
+			- Ninguno : 
 	 
 	*/
 
@@ -256,8 +282,6 @@ void crearArchivoVehiculo(char *archivoIdent,struct tm* tiempoEntrada){
 	fprintf(archivoCarros,"%d %d %d:%d",tiempoEntrada->tm_mday,tiempoEntrada->tm_mon,
 					tiempoEntrada->tm_hour, tiempoEntrada->tm_min);
 
-	printf("Mes %d\n",tiempoEntrada->tm_mon);
-	printf("Dia %d\n",tiempoEntrada->tm_mday);
 	// Se cierra el archivo.
 	fclose(archivoCarros);
 
@@ -270,14 +294,25 @@ int contarVehiculosEstacionados(char *ruta){
 
 	/*  Descripcion de la funcion:
 
+			Dado el nombre de un directorio esta funcion cuenta todos los 
+		archivos que se encuentran en el mismo exceptuando . y ..
+
+			En el caso particular los archivos representan el numero se 
+		vehivulos estacionados.
+		
 		Parametros de entrada:
 
+			- ruta: Ruta del directorio del cual se contaran los archivos
+
 		Parametros de salida:
+
+			- Devuelve el numero de archivos del directorio dado.
 	 
 	*/
 
 	// Declaracion de variables:
-	int contadorArchivos = 0;	// Se inicializa la variable que contara el numero de carpetas.
+	int contadorArchivos = 0;	// Se inicializa la variable que contara 
+								// el numero de carpetas.
 	DIR *dirp;					// Variable que se utilizara para abrir el directorio.
 	struct dirent *direntp;		// Estructura que permite leer los archivos.
 	
