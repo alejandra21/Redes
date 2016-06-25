@@ -64,6 +64,8 @@ int calcularCosto(char *identificador) {
 	// Se abre el archivo y se lee la fecha
 	archivoS = fopen(identificador,"r");
 	fscanf(archivoS," %d %d %d:%d",&dia,&mes,&horas,&minutos);
+
+
 	fclose(archivoS);
 
 	// Se elimina el archivo
@@ -242,6 +244,7 @@ void escibirBitacoraSalida(char *bitacoraSalida,char *identificador,int montoApa
 	// Declaracion de variables:
 	FILE *archivoS;
 
+
 	// Se abre el archivo
 	archivoS = fopen(bitacoraSalida,"a");
 	// Se escribe en el archivo
@@ -282,6 +285,7 @@ void crearArchivoVehiculo(char *archivoIdent,struct tm* tiempoEntrada){
 	fprintf(archivoCarros,"%d %d %d:%d",tiempoEntrada->tm_mday,tiempoEntrada->tm_mon,
 					tiempoEntrada->tm_hour, tiempoEntrada->tm_min);
 
+	
 	// Se cierra el archivo.
 	fclose(archivoCarros);
 
@@ -334,5 +338,3 @@ int contarVehiculosEstacionados(char *ruta){
 	return contadorArchivos - 2;
 
 }
-
-//----------------------------------------------------------------------------//

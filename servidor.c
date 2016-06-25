@@ -66,8 +66,8 @@ int main(int argc, char *argv[])
 
     struct message{
         uint16_t operacion;
+        uint32_t id;
         uint32_t datos;
-        uint32_t datosOpc;
     } mensaje;
 
 	/* code */
@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
 
 	// Se calcula el numero de puestos disponibles.
 	puestosDisponibles = puestosDisponibles - contadorArchivos;
-	printf("Funcion de contar directoris %d\n",puestosDisponibles);
+	printf("Puestos disponibles:  %d\n",puestosDisponibles);
 
 	while(1) {
 
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 		}
 
         operacion = ntohs(mensaje.operacion);
-        identificador = ntohl(mensaje.datos);
+        identificador = ntohl(mensaje.id);
 
 		// Se crea la ruta del archivo que contendra informacion de la fecha de 
 		// llegada del nuevo carro.
@@ -194,7 +194,6 @@ int main(int argc, char *argv[])
 
 		if (childpid == 0) {
 
-			printf("Soy el hijo \n");
 			printf("Puestos disponibles:  %d\n",puestosDisponibles);
 			printf("errorIdentificador:  %d\n",errorIdentificador);
 			printf("operacion %d\n",operacion);
@@ -210,7 +209,7 @@ int main(int argc, char *argv[])
 					printf("Soy salida\n");
 
 					mensaje.operacion = pagoCorrecto;
-					mensaje.datosOpc = montoApagar;
+					mensaje.datos = montoApagar;
 					
 
 				}
@@ -253,9 +252,8 @@ int main(int argc, char *argv[])
 
 						// Se arma el mensaje del cliente
 						mensaje.operacion = entradaCorrecta;
-						mensaje.datos = identificador;
-						mensaje.datosOpc = tiempo;
-					    printf("Tiempo unit32_t %d\n",tiempo);
+						mensaje.id = identificador;
+						mensaje.datos = tiempo;
 
 					}
 
@@ -270,8 +268,8 @@ int main(int argc, char *argv[])
 			}
 
             mensaje.operacion = htons(mensaje.operacion);
+            mensaje.id =  htonl(mensaje.id);
             mensaje.datos =  htonl(mensaje.datos);
-            mensaje.datosOpc =  htonl(mensaje.datosOpc);
 
 			if ((numbytes2=sendto(sockfd,&mensaje,sizeof(mensaje),0,
 				(struct sockaddr *)&their_addr, 
@@ -279,7 +277,7 @@ int main(int argc, char *argv[])
 				perror("sendto"); 
 				exit(2); 
 			} 
-
+            printf("\n");
 			exit(0);
 
 		}
