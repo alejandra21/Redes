@@ -24,13 +24,17 @@ int main(int argc, char *argv[])
 {
 	int serverPort;
 	int sockfd;
-	int addr_len,numbytes,numbytes2; /* conteo de bytes a escribir */ 
+	int addr_len;
+	int numbytes;
+	int numbytes2;  
 	int numeroIntentos;
 	char *fecha;
 	time_t tiempoActual;
 	uint16_t operacion;
 	uint32_t id;
 	uint32_t datos;
+
+	// Tipos de datos
 	uint16_t entrada = 0;
 	uint16_t salida = 1;
 	uint16_t ack = 2;
@@ -40,17 +44,19 @@ int main(int argc, char *argv[])
     uint16_t pagoCorrecto = 6;
     uint16_t errorID = 7;
 
-	struct sockaddr_in their_addr; /* almacenara la direccion IP y numero de puerto del servidor */ 
+    // Estructuras
+	struct sockaddr_in their_addr; 
 	struct hostent *direccionDestino; 
 	struct timeval timeout; 
 
+	// Estructuras para los mensajes
     struct message{
         uint16_t operacion;
         uint32_t id;
         uint32_t datos;
     } mensaje;
 
-	/* code */
+	// Se verifican los argumentos
 	if (argc != 9){
 
 		printf("Los argumentos no fueron pasados de forma correcta.\n");
@@ -72,7 +78,7 @@ int main(int argc, char *argv[])
 				}
 				else if ( strcmp(argv[i],"-d") == 0){
 
-					/* convertimos el hostname a su direccion IP */ 
+					// Convertimos el hostname a su direccion IP 
 					if ((direccionDestino=gethostbyname(argv[i+1])) == NULL) { 
 						perror("gethostbyname"); 
 						exit(1); 
@@ -127,11 +133,11 @@ int main(int argc, char *argv[])
 	            sizeof(timeout)) < 0)
 	    perror("setsockopt failed\n");
 
-	/* a donde mandar */ 
-	their_addr.sin_family = AF_INET; /* usa host byte order */ 
-	their_addr.sin_port = htons(serverPort); /* usa network byte order */ 
+	// Se establece la estructura my_addr
+	their_addr.sin_family = AF_INET;  
+	their_addr.sin_port = htons(serverPort); 
 	their_addr.sin_addr = *((struct in_addr *)direccionDestino->h_addr); 
-	bzero(&(their_addr.sin_zero), 8); /* pone en cero el resto */ 
+	bzero(&(their_addr.sin_zero), 8); 
 	
 	// Se envia el mensaje con toda la informacion del cliente al servidor
 	if ((numbytes=sendto(sockfd,&mensaje,sizeof(mensaje),0,(struct sockaddr *)&their_addr,sizeof(their_addr))) == -1) { 

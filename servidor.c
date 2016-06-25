@@ -5,11 +5,11 @@
 	Alejandra Cordero / Carnet: 12-10645
 	Ricardo Mena  / Carnet: 12-10872
 
- Ultima modificacion: 09/05/2015
+ Ultima modificacion: 25/06/2016
 
 */
 
-
+// Directivas de Preprocesador:
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <errno.h> 
@@ -26,18 +26,21 @@
 #include <fcntl.h>
 #include <time.h>
 #include "lib_servidor.h"
-#define BUFFER_LEN 1024 
-#define PUESTOS_DISP 200 
-
 
 int main(int argc, char *argv[])
 {
-	int sockfd; /* descriptor para el socket */ 
+	// Declaracion de variables
+
+	int sockfd;  // Descriptor del socket
 	int serverPort;
 	int montoApagar;
-	int puestosDisponibles = 200;
 	int contadorArchivos;
 	int errorIdentificador;
+	int addr_len, numbytes, numbytes2; 
+	int tiempo;
+	int puestosDisponibles = 200;
+
+	// Tipos de datos
 	uint16_t entrada = 0;
 	uint16_t salida = 1;
 	uint16_t ack = 2;
@@ -46,23 +49,20 @@ int main(int argc, char *argv[])
 	uint16_t sinPuesto = 5;
     uint16_t pagoCorrecto = 6;
     uint16_t errorID = 7;
+	uint16_t operacion;
+	uint32_t identificador;
 	pid_t childpid;	
 	time_t tiempoActual;
 	char *fecha;
 	char *op;
 	char *bitacoraEntrada;
 	char *bitacoraSalida;
-	uint32_t identificador;
-	int tiempo;
 	char ident[20];
-	uint16_t operacion;
 	char *ruta = "./vehiculos";
-	char mensajeCliente[100]; // Debe ser dinamico
-	char archivoIdent[100];	  // Debe ser dinamico
-	struct sockaddr_in my_addr; /* direccion IP y numero de puerto local */ 
-	struct sockaddr_in their_addr; /* direccion IP y numero de puerto del cliente */
+	char archivoIdent[100];	  
+	struct sockaddr_in my_addr;    //direccion IP y numero de puerto local  
+	struct sockaddr_in their_addr; //direccion IP y numero de puerto del cliente 
 	struct tm *tiempoEntrada;
-	int addr_len, numbytes, numbytes2; 
 
     struct message{
         uint16_t operacion;
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
         uint32_t datos;
     } mensaje;
 
-	/* code */
+	// Se verifican los argumentos
 	if (argc != 7){
 
 		printf("Los argumentos no fueron pasados de forma correcta.\n");
@@ -121,20 +121,20 @@ int main(int argc, char *argv[])
 		exit(1); 
  	} 
 
- 	/* Se establece la estructura my_addr para luego llamar a bind() */ 
-	my_addr.sin_family = AF_INET; /* usa host byte order */ 
-	my_addr.sin_port = htons(serverPort); /* usa network byte order */ 
-	my_addr.sin_addr.s_addr = INADDR_ANY; /* escuchamos en todas las IPs */ 
-	bzero(&(my_addr.sin_zero), 8); /* rellena con ceros el resto de la estructura */ 
+ 	// Se establece la estructura my_addr para luego llamar a bind() 
+	my_addr.sin_family = AF_INET; 
+	my_addr.sin_port = htons(serverPort); 
+	my_addr.sin_addr.s_addr = INADDR_ANY; 
+	bzero(&(my_addr.sin_zero), 8); 
 					
-	/* Se le da un nombre al socket (se lo asocia al puerto e IPs) */ 
-	printf("Asignado direccion al socket ....\n"); 
+	// Se le da un nombre al socket (se lo asocia al puerto e IPs)
+	
 	if (bind(sockfd, (struct sockaddr *)&my_addr, sizeof(struct sockaddr)) == -1) { 
 		perror("bind"); 
 		exit(2); 
 	}
 
-	/* Se reciben los datos (directamente, UDP no necesita conexión) */ 
+	/* Se reciben los datos  */ 
 	addr_len = sizeof(struct sockaddr); 
 
 	// Se cuenta el numero de vehiculo que ya estan estacionados.
@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 			(struct sockaddr *)&their_addr,
 			(socklen_t *)&addr_len)) == -1) { 
 
-			perror("recvfrom"); 
+			perror("Problemas en funcion recvfrom:"); 
 			exit(3); 
 		}
 
@@ -190,6 +190,7 @@ int main(int argc, char *argv[])
 
 		}
 
+		// Se crea un hijo
 		childpid = fork();
 
 		if (childpid == 0) {
@@ -200,13 +201,10 @@ int main(int argc, char *argv[])
 
 			if (errorIdentificador == 0){
 
-				memset(mensajeCliente, 0, sizeof mensajeCliente);
 				if (operacion == 1){
 
 					montoApagar = calcularCosto(archivoIdent);
 					escibirBitacoraSalida(bitacoraSalida,ident,montoApagar);
-
-					printf("Soy salida\n");
 
 					mensaje.operacion = pagoCorrecto;
 					mensaje.datos = montoApagar;
@@ -259,10 +257,10 @@ int main(int argc, char *argv[])
 
 				}
 
-
 			}
 
 			else {
+				// Se envia un mensaje de error
                 mensaje.operacion = errorID;
 
 			}
