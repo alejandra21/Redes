@@ -5,11 +5,11 @@
 	Alejandra Cordero / Carnet: 12-10645
 	Ricardo Mena  / Carnet: 12-10872
 
- Ultima modificacion: 09/05/2015
+ Ultima modificacion: 25/06/2016
 
 */
 
-
+// Directivas de Preprocesador:
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <errno.h> 
@@ -37,8 +37,8 @@ int main(int argc, char *argv[])
 	// Tipos de datos
 	uint16_t entrada = 0;
 	uint16_t salida = 1;
-	uint16_t ack = 2;
-	uint16_t rr =3;
+/*	uint16_t ack = 2;
+	uint16_t rr =3;*/
 	uint16_t entradaCorrecta = 4;
 	uint16_t sinPuesto = 5;
     uint16_t pagoCorrecto = 6;

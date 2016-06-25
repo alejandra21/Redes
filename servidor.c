@@ -43,8 +43,8 @@ int main(int argc, char *argv[])
 	// Tipos de datos
 	uint16_t entrada = 0;
 	uint16_t salida = 1;
-	uint16_t ack = 2;
-	uint16_t rr =3;
+/*	uint16_t ack = 2;
+	uint16_t rr =3;*/
 	uint16_t entradaCorrecta = 4;
 	uint16_t sinPuesto = 5;
     uint16_t pagoCorrecto = 6;
@@ -113,6 +113,7 @@ int main(int argc, char *argv[])
 
 	// Se crea una carpeta para guardar la informacion de la hora de los
 	// vehiculos que entran.
+	printf("El servidor esta iniciando...\n");
 	mkdir(ruta, 0700);
 
 	/* se crea el socket */ 
@@ -142,7 +143,6 @@ int main(int argc, char *argv[])
 
 	// Se calcula el numero de puestos disponibles.
 	puestosDisponibles = puestosDisponibles - contadorArchivos;
-	printf("Puestos disponibles:  %d\n",puestosDisponibles);
 
 	while(1) {
 
@@ -194,10 +194,6 @@ int main(int argc, char *argv[])
 		childpid = fork();
 
 		if (childpid == 0) {
-
-			printf("Puestos disponibles:  %d\n",puestosDisponibles);
-			printf("errorIdentificador:  %d\n",errorIdentificador);
-			printf("operacion %d\n",operacion);
 
 			if (errorIdentificador == 0){
 
@@ -275,7 +271,6 @@ int main(int argc, char *argv[])
 				perror("sendto"); 
 				exit(2); 
 			} 
-            printf("\n");
 			exit(0);
 
 		}
