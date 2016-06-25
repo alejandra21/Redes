@@ -15,14 +15,14 @@ DESCRIPCION DEL PROGRAMA:
 	uso de estacionamiento del Centro Comercial Moriah.
 
 		Si un vehiculo requiere entrar entonces hara uso de una de las puertas del 
-	estacionamiento (cliente) esta a su vez enviara una solicitud al servidor. Si hay puestos
-	disponibles el servidor enviara la informacion pertinente al cliente para que este le imprima
-	el ticket al vehiculo. Si no hay puesto entonces el servidor enviara un mensaje al cliente 
-	informando que no hay puestos disponibles.
+	estacionamiento (cliente) y esta a su vez enviará una solicitud al servidor. Si hay puestos
+	disponibles el servidor enviara la información pertinente al cliente para que este le imprima
+	el ticket al vehículo que quiere entrar. Si no hay puesto entonces el servidor enviara un mensaje 
+	al cliente informando que no hay puestos disponibles.
 
-		Por otra parte, si un vehiculo estacionado quiere salir de igual manera hara uso del cliente 
-	del sistema. El cliente enviara una solicitud de salida al servidor,el servidor calculara el monto 
-	que debera pagar el vehiculo y se lo enviara al cliente y este por su parte imprimira el ticket.
+		Por otra parte, si un vehiculo estacionado quiere salir de igual, manera hara uso del cliente 
+	del sistema. El cliente enviará una solicitud de salida al servidor,el servidor calculará el monto 
+	que deberá pagar el vehículo y se lo enviará al cliente y este por su parte imprimira el ticket.
 
 ARCHIVOS DE LA ENTREGA:
 
@@ -88,5 +88,4 @@ INSTRUCCIONES DE EJECUCION
 
 CIERTAS CONDICIONES
 
-
-
+	1 - El rango de identificadores que puede poseer un vehiculo va del 0 al 429496725

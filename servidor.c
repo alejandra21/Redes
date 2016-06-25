@@ -170,6 +170,7 @@ int main(int argc, char *argv[])
         else {
             op = "s";
         }
+
 		errorIdentificador = verificarID(archivoIdent,op);
 
 		// Despues de verificar si existe un erro con el ID se incrementa
@@ -193,11 +194,13 @@ int main(int argc, char *argv[])
 		// Se crea un hijo
 		childpid = fork();
 
+		// Codigo que ejecuta el proceso hijo
 		if (childpid == 0) {
 
+			// Si no hay algun error con el ID del vehiculo
 			if (errorIdentificador == 0){
 
-				if (operacion == 1){
+				if (operacion == salida){
 
 					montoApagar = calcularCosto(archivoIdent);
 					escibirBitacoraSalida(bitacoraSalida,ident,montoApagar);
@@ -207,7 +210,7 @@ int main(int argc, char *argv[])
 					
 
 				}
-				else if (operacion == 0){
+				else if (operacion == entrada){
 
 
 					// Se verifica si hay puestos disponibles
@@ -235,8 +238,6 @@ int main(int argc, char *argv[])
 					
 					    }
 
-					    tiempo = (int)tiempoActual;
-	
 					    tiempoEntrada = localtime(&tiempoActual);
 					    // Se crea el archivo del vehiculo
 						crearArchivoVehiculo(archivoIdent,tiempoEntrada);
@@ -245,6 +246,7 @@ int main(int argc, char *argv[])
 						escibirBitacoraEntrada(bitacoraEntrada,ident,fecha);
 
 						// Se arma el mensaje del cliente
+					    tiempo = (int)tiempoActual;
 						mensaje.operacion = entradaCorrecta;
 						mensaje.id = identificador;
 						mensaje.datos = tiempo;
@@ -281,7 +283,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/* cerramos descriptor del socket */ 
+	// Se cierra el descriptor del socket 
 	close(sockfd); 
  
 	return 0;
