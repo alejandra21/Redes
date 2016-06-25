@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 
 	// Se crea el socket
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) { 
-		perror("socket"); 
+		perror("Error en la funcion socket:"); 
 		exit(2); 
 	} 
 
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 
 	if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,
 	            sizeof(timeout)) < 0)
-	    perror("setsockopt failed\n");
+	    perror("Error en la funcion setsockopt:\n");
 
 	// Se establece la estructura my_addr
 	their_addr.sin_family = AF_INET;  
@@ -139,9 +139,10 @@ int main(int argc, char *argv[])
 	their_addr.sin_addr = *((struct in_addr *)direccionDestino->h_addr); 
 	bzero(&(their_addr.sin_zero), 8); 
 	
+	printf("Enviando informacion al servidor ...\n");
 	// Se envia el mensaje con toda la informacion del cliente al servidor
 	if ((numbytes=sendto(sockfd,&mensaje,sizeof(mensaje),0,(struct sockaddr *)&their_addr,sizeof(their_addr))) == -1) { 
-		perror("sendto"); 
+		perror("Error en la funcion sendto:"); 
 		exit(2); 
 	} 
 
@@ -156,10 +157,9 @@ int main(int argc, char *argv[])
 
 	while (numbytes2 == -1 && numeroIntentos <= 3){
 
-		printf("Numero de intentos : %d\n",numeroIntentos);
 		if ((numbytes=sendto(sockfd,&mensaje,sizeof(mensaje),0,
 			(struct sockaddr *)&their_addr,sizeof(struct sockaddr))) == -1) { 
-			perror("sendto"); 
+			perror("Error en la funcion sendto:"); 
 			exit(2); 
 		} 
 
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 			printf("----------------------------------------------\n");
 			printf("                   TICKET                     \n");
 			printf("----------------------------------------------\n");
-			printf("ID del vehiculo: %d \nFecha de entrada: %s",id,fecha);
+			printf("ID del vehiculo: %u \nFecha de entrada: %s",id,fecha);
 			printf("----------------------------------------------\n");
 
 		}

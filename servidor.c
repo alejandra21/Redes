@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 
 	/* se crea el socket */ 
 	if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) { 
-		perror("socket"); 
+		perror("Error en la funcion socket:"); 
 		exit(1); 
  	} 
 
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 	// Se le da un nombre al socket (se lo asocia al puerto e IPs)
 	
 	if (bind(sockfd, (struct sockaddr *)&my_addr, sizeof(struct sockaddr)) == -1) { 
-		perror("bind"); 
+		perror("Error en la funcion bind:"); 
 		exit(2); 
 	}
 
@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 			(struct sockaddr *)&their_addr,
 			(socklen_t *)&addr_len)) == -1) { 
 
-			perror("Problemas en funcion recvfrom:"); 
+			perror("Error en la funcion recvfrom:"); 
 			exit(3); 
 		}
 
@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
 			if ((numbytes2=sendto(sockfd,&mensaje,sizeof(mensaje),0,
 				(struct sockaddr *)&their_addr, 
 				sizeof(struct sockaddr))) == -1) { 
-				perror("sendto"); 
+				perror("Error en la funcion sendto:"); 
 				exit(2); 
 			} 
 			exit(0);
