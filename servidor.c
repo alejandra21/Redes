@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
     struct message{
         uint16_t operacion;
         uint32_t datos;
+        uint32_t datosOpc;
     } mensaje;
 
 	/* code */
@@ -209,7 +210,7 @@ int main(int argc, char *argv[])
 					printf("Soy salida\n");
 
 					mensaje.operacion = pagoCorrecto;
-					mensaje.datos = montoApagar;
+					mensaje.datosOpc = montoApagar;
 					
 
 				}
@@ -252,7 +253,8 @@ int main(int argc, char *argv[])
 
 						// Se arma el mensaje del cliente
 						mensaje.operacion = entradaCorrecta;
-						mensaje.datos = tiempo;
+						mensaje.datos = identificador;
+						mensaje.datosOpc = tiempo;
 					    printf("Tiempo unit32_t %d\n",tiempo);
 
 					}
@@ -269,6 +271,7 @@ int main(int argc, char *argv[])
 
             mensaje.operacion = htons(mensaje.operacion);
             mensaje.datos =  htonl(mensaje.datos);
+            mensaje.datosOpc =  htonl(mensaje.datosOpc);
 
 			if ((numbytes2=sendto(sockfd,&mensaje,sizeof(mensaje),0,
 				(struct sockaddr *)&their_addr, 

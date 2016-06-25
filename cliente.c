@@ -28,6 +28,9 @@ int main(int argc, char *argv[])
 	int numeroIntentos;
 	char *fecha;
 	time_t tiempoActual;
+	uint16_t operacion;
+	uint32_t datos;
+	uint32_t datosOpc;
 	uint16_t entrada = 0;
 	uint16_t salida = 1;
 	uint16_t ack = 2;
@@ -44,6 +47,7 @@ int main(int argc, char *argv[])
     struct message{
         uint16_t operacion;
         uint32_t datos;
+        uint32_t datosOpc;
     } mensaje;
 
 	/* code */
@@ -166,10 +170,12 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 	else{
-
-		if (ntohs(mensaje.operacion) == entradaCorrecta){
-
-			tiempoActual = (time_t)ntohl(mensaje.datos);
+        operacion = ntohs(mensaje.operacion);
+	    datos = ntohl(mensaje.datos);
+	    datosOpc = ntohl(mensaje.datosOpc);
+	    
+		if (operacion == entradaCorrecta) {
+			tiempoActual = (time_t)datosOpc;
 			// Se cambia el formato de la hora
 			fecha = ctime(&tiempoActual);
 
@@ -180,22 +186,22 @@ int main(int argc, char *argv[])
 			}
 
 			// Falta id
-			printf("ID del vehiculo: \nFecha de entrada: %s",fecha);
+			printf("ID del vehiculo: %d \nFecha de entrada: %s",datos,fecha);
 
 		}
-		else if (ntohs(mensaje.operacion) == sinPuesto){
+		else if (operacion == sinPuesto){
 
 			printf("No hay puestos disponibles en el estacionamiento. \n");
 
 		}
-		else if (ntohs(mensaje.operacion) == pagoCorrecto){
+		else if (operacion == pagoCorrecto){
 
-			printf("El monto a pagar es de: %d Bs. \n",ntohl(mensaje.datos));
+			printf("El monto a pagar es de: %d Bs. \n",ntohl(mensaje.datosOpc));
 
 		}
-		else if (ntohs(mensaje.operacion) == errorID){
+		else if (operacion == errorID){
 
-			printf("Hay un erro con el ID introducido. \n");
+			printf("Hay un error con el ID introducido. \n");
 
 		}
 		
