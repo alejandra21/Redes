@@ -145,7 +145,7 @@ int verificarID(char *archivoIdent,char *operacion){
 	 
 	*/
 
-	printf(" Archivo identificador %s\n",archivoIdent);
+	printf("Archivo identificador %s\n",archivoIdent);
 	// Si existe quiere decir que hay 
 	if ( ( (access(archivoIdent,F_OK ) != -1) && \
 		(strcmp(operacion,"e")==0) ) || ( (access(archivoIdent,F_OK ) == -1) && \

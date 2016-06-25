@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
 	char *fecha;
 	time_t tiempoActual;
 	uint16_t operacion;
+	uint32_t id;
 	uint32_t datos;
-	uint32_t datosOpc;
 	uint16_t entrada = 0;
 	uint16_t salida = 1;
 	uint16_t ack = 2;
@@ -46,8 +46,8 @@ int main(int argc, char *argv[])
 
     struct message{
         uint16_t operacion;
+        uint32_t id;
         uint32_t datos;
-        uint32_t datosOpc;
     } mensaje;
 
 	/* code */
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 				}
 
 				else if ( strcmp(argv[i],"-i") == 0){
-					mensaje.datos = htonl(atoi(argv[i+1]));
+					mensaje.id = htonl(atoi(argv[i+1]));
 
 				}
 
@@ -171,11 +171,11 @@ int main(int argc, char *argv[])
 	}
 	else{
         operacion = ntohs(mensaje.operacion);
+	    id = ntohl(mensaje.id);
 	    datos = ntohl(mensaje.datos);
-	    datosOpc = ntohl(mensaje.datosOpc);
 	    
 		if (operacion == entradaCorrecta) {
-			tiempoActual = (time_t)datosOpc;
+			tiempoActual = (time_t)datos;
 			// Se cambia el formato de la hora
 			fecha = ctime(&tiempoActual);
 
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
 			}
 
 			// Falta id
-			printf("ID del vehiculo: %d \nFecha de entrada: %s",datos,fecha);
+			printf("ID del vehiculo: %d \nFecha de entrada: %s",id,fecha);
 
 		}
 		else if (operacion == sinPuesto){
@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
 		}
 		else if (operacion == pagoCorrecto){
 
-			printf("El monto a pagar es de: %d Bs. \n",ntohl(mensaje.datosOpc));
+			printf("El monto a pagar es de: %d Bs. \n",datos);
 
 		}
 		else if (operacion == errorID){
