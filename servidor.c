@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 		exit(2); 
 	}
 
-	/* Se reciben los datos  */ 
+	// Se reciben los datos   
 	addr_len = sizeof(struct sockaddr); 
 
 	// Se cuenta el numero de vehiculo que ya estan estacionados.
@@ -177,13 +177,13 @@ int main(int argc, char *argv[])
 		// o se decrementa el numero de puestos disponibles.
 		if (errorIdentificador == 0 ){
 
-			if (operacion== entrada){
+			if (operacion == entrada){
 
 				puestosDisponibles = puestosDisponibles - 1;
 
 			}
 
-			else if (operacion== salida){
+			else if (operacion == salida){
 
 				puestosDisponibles = puestosDisponibles + 1;
 
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
 
 
 					// Se verifica si hay puestos disponibles
-					if (puestosDisponibles == 0){
+					if (puestosDisponibles < 0){
 
 						mensaje.operacion = sinPuesto;
 
