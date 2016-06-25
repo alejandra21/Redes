@@ -22,16 +22,33 @@
 #include <time.h>
 
 
+//----------------------------------------------------------------------------//
+
 int calcularCosto(char *identificador) {
 
 
 	/*  Descripcion de la funcion:
 
+			Esta funcion dada la ruta de un archivo que contenga alguna fecha. 
+		Calcula el tiempo actual, verifica cuanto tiempo ha transcurrido desde
+		la fecha extraida del archivo y calcula un monto siguiendo las 
+		siguientes consideraciones:
+			- Las fraciones de hora vales 30
+			- Cada hora vale 80.
+			- La primera fraccion de hora vale 80
+
 		Parametros de entrada:
 
+			- identificador: Es la ruta del archivo que contiene la fecha.
+
 		Parametros de salida:
+
+			Monto a pagar segun el numero de horas que han trascurrido desde
+		la fecha que se encuentra en el archivo.
 	 
 	*/
+
+	// Declaracion de variables:
 	int dia;
 	int mes;
 	int horas;
@@ -44,12 +61,12 @@ int calcularCosto(char *identificador) {
     struct tm *tiempoSalida;
 	FILE *archivoS;
 
+	// Se abre el archivo y se lee la fecha
 	archivoS = fopen(identificador,"r");
 	fscanf(archivoS," %d %d %d:%d",&dia,&mes,&horas,&minutos);
-
-	printf("Linea extraida %d : %d \n",horas,minutos);
 	fclose(archivoS);
 
+	// Se elimina el archivo
 	remove(identificador);
 
 
@@ -62,6 +79,7 @@ int calcularCosto(char *identificador) {
         exit(0);
     }
 
+    // Se resta la fecha del tiempo actual con la fecha del archivo.
     tiempoSalida = localtime( &tiempoActual);
     diasTotales = tiempoSalida->tm_mday - dia;
     mesesTodales = tiempoSalida->tm_mon - mes;
@@ -69,16 +87,13 @@ int calcularCosto(char *identificador) {
     minutosTotales = tiempoSalida->tm_min - minutos;
 
 
-    printf("Hora de salida: %.2d %.2d\n", 
-        tiempoSalida->tm_hour, tiempoSalida->tm_min);
- 
-
-
+    // Se rectifica la operacion de resta.
 	if (mesesTodales != 0){
 
 	    if (diasTotales < 0){
 
-	    	if ( (mes == 0) | (mes == 2) | (mes == 4) | (mes == 6) | (mes == 7) | (mes == 9) | (mes == 11) ) {
+	    	if ( (mes == 0) | (mes == 2) | (mes == 4) | (mes == 6) |\
+	    	 (mes == 7) | (mes == 9) | (mes == 11) ) {
 
 	    		diasTotales = 31 + diasTotales;
 	    	}
@@ -111,9 +126,9 @@ int calcularCosto(char *identificador) {
     	horasTotales = horasTotales + 24;
     }
 
-    printf("El tiempo del carro es: %.2d %.2d\n", 
         horasTotales, minutosTotales);
 
+	// Se calcula el monto a pagar
     if (horasTotales == 0 && diasTotales == 0) {
 
     	return 80;
@@ -132,7 +147,7 @@ int calcularCosto(char *identificador) {
 
 }
 
-//------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 int verificarID(char *archivoIdent,char *operacion){
 
@@ -161,7 +176,7 @@ int verificarID(char *archivoIdent,char *operacion){
 	}
 }
 
-//------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 void escibirBitacoraEntrada(char *bitacoraEntrada,char *identificador,char *fecha){
 
@@ -174,14 +189,16 @@ void escibirBitacoraEntrada(char *bitacoraEntrada,char *identificador,char *fech
 	 
 	*/
 
+	// Declaracion de variables:
 	FILE *archivoE;
+
 	archivoE = fopen(bitacoraEntrada,"a");
 	fprintf(archivoE,"ID :%s ingreso en la fecha :%s",identificador,fecha);
 	fclose(archivoE);
 
 }
 
-//------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 
 void escibirBitacoraSalida(char *bitacoraSalida,char *identificador,int montoApagar){
@@ -194,8 +211,9 @@ void escibirBitacoraSalida(char *bitacoraSalida,char *identificador,int montoApa
 		Parametros de salida:
 	 
 	*/
-
+	// Declaracion de variables:
 	FILE *archivoS;
+
 	// Se abre el archivo
 	archivoS = fopen(bitacoraSalida,"a");
 	// Se escribe en el archivo
@@ -204,7 +222,7 @@ void escibirBitacoraSalida(char *bitacoraSalida,char *identificador,int montoApa
 	fclose(archivoS);
 }
 
-//------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 void crearArchivoVehiculo(char *archivoIdent,struct tm* tiempoEntrada){
 
@@ -217,7 +235,9 @@ void crearArchivoVehiculo(char *archivoIdent,struct tm* tiempoEntrada){
 	 
 	*/
 
+	// Declaracion de variables:
 	FILE *archivoCarros;
+
 	// Se abre el archivo
 	archivoCarros = fopen(archivoIdent,"w");
 	// Se escribe en el archivo
@@ -231,7 +251,7 @@ void crearArchivoVehiculo(char *archivoIdent,struct tm* tiempoEntrada){
 
 }
 
-//------------------------------------------------------------//
+//----------------------------------------------------------------------------//
 
 int contarVehiculosEstacionados(char *ruta){
 
@@ -267,3 +287,5 @@ int contarVehiculosEstacionados(char *ruta){
 	return contadorArchivos - 2;
 
 }
+
+//----------------------------------------------------------------------------//
