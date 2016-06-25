@@ -154,14 +154,26 @@ int verificarID(char *archivoIdent,char *operacion){
 
 	/*  Descripcion de la funcion:
 
+			Esta funcion dada la ruta de un archivo y una operacion (e o s)
+		verifica si esta o no creado un archivo.
+
+			1 - Si la operacion es "e" y el archivo esta creado retornara 1 .
+			2 - Si la operacion es "s" y el archivo no esta creado tambien retornara 1
+			3 - Si el caso no es ninguno de los anteriores entonces retornara 0.
+
 		Parametros de entrada:
 
+			- archivoIdent : ruta del archivo a estudiar.
+			- operacion : esta operacion puede ser "e" (entrada) o "s" (salida)
+
 		Parametros de salida:
+
+			Se retorna 1 (True) si se cumplen las condiciones 1 o 2 de la 
+		descripcion de lo contrario retorna 0.
 	 
 	*/
 
-	printf(" Archivo identificador %s\n",archivoIdent);
-	// Si existe quiere decir que hay 
+
 	if ( ( (access(archivoIdent,F_OK ) != -1) && \
 		(strcmp(operacion,"e")==0) ) || ( (access(archivoIdent,F_OK ) == -1) && \
 		(strcmp(operacion,"s")==0) ) ){
