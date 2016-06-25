@@ -32,22 +32,29 @@
 
 int main(int argc, char *argv[])
 {
-
 	int sockfd; /* descriptor para el socket */ 
 	int serverPort;
-	int contador;
 	int montoApagar;
 	int puestosDisponibles = 200;
 	int contadorArchivos;
 	int errorIdentificador;
+	uint16_t entrada = 0;
+	uint16_t salida = 1;
+	uint16_t ack = 2;
+	uint16_t rr =3;
+	uint16_t entradaCorrecta = 4;
+	uint16_t sinPuesto = 5;
+    uint16_t pagoCorrecto = 6;
+    uint16_t errorID = 7;
 	pid_t childpid;	
 	time_t tiempoActual;
 	char *fecha;
+	char *op;
 	char *bitacoraEntrada;
 	char *bitacoraSalida;
-	char *token;
-	char *identificador;
-	char *operacion;
+	uint32_t identificador;
+	char ident[20];
+	uint16_t operacion;
 	char *ruta = "./vehiculos";
 	char mensajeCliente[100]; // Debe ser dinamico
 	char archivoIdent[100];	  // Debe ser dinamico
@@ -55,8 +62,10 @@ int main(int argc, char *argv[])
 	struct sockaddr_in their_addr; /* direccion IP y numero de puerto del cliente */
 	struct tm *tiempoEntrada;
 	int addr_len, numbytes, numbytes2; 
-	char buf[BUFFER_LEN]; /* Buffer de recepción */ 
-
+    struct message{
+        uint16_t operacion;
+        uint32_t id;
+    } mensaje;
 
 	/* code */
 	if (argc != 7){
@@ -134,7 +143,7 @@ int main(int argc, char *argv[])
 
 	while(1) {
 
-		if ((numbytes=recvfrom(sockfd, buf, BUFFER_LEN, 0,
+		if ((numbytes=recvfrom(sockfd, &mensaje, sizeof(mensaje), 0,
 			(struct sockaddr *)&their_addr,
 			(socklen_t *)&addr_len)) == -1) { 
 
@@ -142,48 +151,36 @@ int main(int argc, char *argv[])
 			exit(3); 
 		}
 
-		// Se divide el mensaje en tokens
-		buf[numbytes] = '\0'; 
-		token = strtok(buf,",");
-		contador = 0;
-		while( token != NULL )  {
-
-			// Se tiene que poner case
-			if (contador == 0){
-				identificador = token;
-			}
-			else if (contador == 1){
-
-				operacion = token;
-			}
-
-			printf("%s\n",token);
-			token = strtok(NULL,",");
-			contador = contador +1 ;
-
-		}
+        operacion = ntohs(mensaje.operacion);
+        identificador = ntohl(mensaje.id);
 
 		// Se crea la ruta del archivo que contendra informacion de la fecha de 
 		// llegada del nuevo carro.
 		memset(archivoIdent, 0, sizeof archivoIdent);
+		sprintf(ident, "%d", identificador);
 		strcat(archivoIdent,"./vehiculos/");
-		strcat(archivoIdent,identificador);
-
-		errorIdentificador = verificarID(archivoIdent,operacion);
+		strcat(archivoIdent,ident);
+        if (operacion == entrada){
+            op = "e";
+        }
+        else {
+            op = "s";
+        }
+		errorIdentificador = verificarID(archivoIdent,op);
 
 		// Despues de verificar si existe un erro con el ID se incrementa
 		// o se decrementa el numero de puestos disponibles.
 		if (errorIdentificador == 0 ){
 
-			if (strcmp(operacion,"s")==0){
+			if (operacion== entrada){
 
-				puestosDisponibles = puestosDisponibles + 1;
+				puestosDisponibles = puestosDisponibles - 1;
 
 			}
 
-			else if (strcmp(operacion,"e")==0){
+			else if (operacion== salida){
 
-				puestosDisponibles = puestosDisponibles - 1;
+				puestosDisponibles = puestosDisponibles + 1;
 
 			}
 
@@ -196,32 +193,32 @@ int main(int argc, char *argv[])
 			printf("Soy el hijo \n");
 			printf("Puestos disponibles:  %d\n",puestosDisponibles);
 			printf("errorIdentificador:  %d\n",errorIdentificador);
-			printf("operacion %s\n",operacion);
+			printf("operacion %d\n",operacion);
 
 			if (errorIdentificador == 0){
 
 				memset(mensajeCliente, 0, sizeof mensajeCliente);
-				if (strcmp(operacion,"s")==0){
+				if (operacion == 1){
 
 					montoApagar = calcularCosto(archivoIdent);
-					escibirBitacoraSalida(bitacoraSalida,identificador,montoApagar);
+					escibirBitacoraSalida(bitacoraSalida,ident,montoApagar);
 
 					printf("Soy salida\n");
-					strcat(mensajeCliente,"Usted debe pagar ");
-					sprintf(mensajeCliente,"%d",montoApagar);
-					strcat(mensajeCliente," Bs.");
+					mensaje.operacion = pagoCorrecto;
+					mensaje.id = montoApagar;
+					
 				
 					//remove(archivoIdent);
 
 
 				}
-				else if (strcmp(operacion,"e")==0){
+				else if (operacion == 0){
 
 
 					// Se verifica si hay puestos disponibles
 					if (puestosDisponibles == 0){
 
-						strcat(mensajeCliente,"No hay chance");
+						mensaje.operacion = sinPuesto;
 
 					}
 					else {
@@ -248,12 +245,10 @@ int main(int argc, char *argv[])
 						crearArchivoVehiculo(archivoIdent,tiempoEntrada);
 
 						// Se escribe en la bitacora de entrada
-						escibirBitacoraEntrada(bitacoraEntrada,identificador,fecha);
+						escibirBitacoraEntrada(bitacoraEntrada,ident,fecha);
 
 						// Se arma el mensaje del cliente
-						strcat(mensajeCliente,identificador);
-						strcat(mensajeCliente," ");
-						strcat(mensajeCliente,fecha);
+						mensaje.operacion = entradaCorrecta;
 
 					}
 
@@ -263,13 +258,13 @@ int main(int argc, char *argv[])
 			}
 
 			else {
-
-				strcat(mensajeCliente,"Hay un error con su ID.");
+                mensaje.operacion = errorID;
+                mensaje.operacion = htons(mensaje.operacion);
 
 			}
 
 			printf("Voy a enviar \n");
-			if ((numbytes2=sendto(sockfd,mensajeCliente,strlen(mensajeCliente),0,
+			if ((numbytes2=sendto(sockfd,&mensaje,sizeof(mensaje),0,
 				(struct sockaddr *)&their_addr, 
 				sizeof(struct sockaddr))) == -1) { 
 				perror("sendto"); 

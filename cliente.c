@@ -28,13 +28,24 @@ int main(int argc, char *argv[])
 	int numeroIntentos;
 	char *identificador;
 	char *operacion;
-	char mensaje[80];
 	char recibido[30];
+	uint16_t entrada = 0;
+	uint16_t salida = 1;
+	uint16_t ack = 2;
+	uint16_t rr =3;
+	uint16_t entradaCorrecta = 4;
+	uint16_t sinPuesto = 5;
+    uint16_t pagoCorrecto = 6;
+    uint16_t errorID = 7;
 
 	struct sockaddr_in their_addr; /* almacenara la direccion IP y numero de puerto del servidor */ 
 	struct hostent *direccionDestino; 
 	struct timeval timeout; 
 
+    struct message{
+        uint16_t operacion;
+        uint32_t id;
+    } mensaje;
 
 	/* code */
 	if (argc != 9){
@@ -67,10 +78,13 @@ int main(int argc, char *argv[])
 				}
 				else if ( strcmp(argv[i],"-c") == 0){
 
-					if (( strcmp(argv[i+1],"s") == 0)||( strcmp(argv[i+1],"e") == 0)) {
-						operacion = argv[i+1];
+					if ( strcmp(argv[i+1],"e") == 0) {
+						mensaje.operacion = htons(entrada);
 					}
-					else{
+					else if ( strcmp(argv[i+1],"s") == 0){
+					    mensaje.operacion = htons(salida);
+					}
+					else{ 
 						printf("Los argumentos no fueron pasados de forma \
 							   correcta.\n");
 						exit(0);	
@@ -79,7 +93,7 @@ int main(int argc, char *argv[])
 				}
 
 				else if ( strcmp(argv[i],"-i") == 0){
-					identificador = argv[i+1];
+					mensaje.id = htonl(atoi(argv[i+1]));
 
 				}
 
@@ -116,24 +130,17 @@ int main(int argc, char *argv[])
 	their_addr.sin_addr = *((struct in_addr *)direccionDestino->h_addr); 
 	bzero(&(their_addr.sin_zero), 8); /* pone en cero el resto */ 
 
-
-    // Se arma el mensaje que se le enviara al servidor.
-    memset(mensaje, 0, sizeof mensaje); // Se limpia el arrecho de caracteres.
-    strcat(mensaje,identificador);  	// Indetificador del vehiculo
-    strcat(mensaje,",");
-    strcat(mensaje,operacion);			// Operacion que realizara el vehiculo
-
-	printf("mensaje :%s \n", mensaje);
+	printf("mensaje :%d %d \n", mensaje.operacion, mensaje.id);
 	
 	// Se envia el mensaje con toda la informacion del cliente al servidor
-	if ((numbytes=sendto(sockfd,mensaje,strlen(mensaje),0,
-		(struct sockaddr *)&their_addr,sizeof(struct sockaddr))) == -1) { 
+	if ((numbytes=sendto(sockfd,&mensaje,sizeof(mensaje),0,(struct sockaddr *)&their_addr,sizeof(their_addr))) == -1) { 
 		perror("sendto"); 
 		exit(2); 
 	} 
 
+
 	// Se espera el mensaje del servidor.
-	numbytes2 = recvfrom(sockfd,recibido,30,0, (struct sockaddr *)&their_addr,
+	numbytes2 = recvfrom(sockfd,&mensaje,30,0, (struct sockaddr *)&their_addr,
 		(socklen_t *)&addr_len);
 
 	// Si no se recibe algun mensaje del servidor despues de 2 seg se intenta
@@ -142,13 +149,13 @@ int main(int argc, char *argv[])
 	while (numbytes2 == -1 && numeroIntentos <= 3){
 
 		printf("Numero de intentos : %d\n",numeroIntentos);
-		if ((numbytes=sendto(sockfd,mensaje,strlen(mensaje),0,
+		if ((numbytes=sendto(sockfd,&mensaje,sizeof(mensaje),0,
 			(struct sockaddr *)&their_addr,sizeof(struct sockaddr))) == -1) { 
 			perror("sendto"); 
 			exit(2); 
 		} 
 
-		numbytes2 = recvfrom(sockfd,recibido,30,0, (struct sockaddr *)&their_addr,
+		numbytes2 = recvfrom(sockfd,&mensaje,30,0, (struct sockaddr *)&their_addr,
 			(socklen_t *)&addr_len);
 
 		numeroIntentos = numeroIntentos + 1;
