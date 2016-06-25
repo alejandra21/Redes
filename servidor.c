@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
 	char *bitacoraEntrada;
 	char *bitacoraSalida;
 	uint32_t identificador;
+	int tiempo;
 	char ident[20];
 	uint16_t operacion;
 	char *ruta = "./vehiculos";
@@ -62,9 +63,10 @@ int main(int argc, char *argv[])
 	struct sockaddr_in their_addr; /* direccion IP y numero de puerto del cliente */
 	struct tm *tiempoEntrada;
 	int addr_len, numbytes, numbytes2; 
+
     struct message{
         uint16_t operacion;
-        uint32_t id;
+        uint32_t datos;
     } mensaje;
 
 	/* code */
@@ -152,7 +154,7 @@ int main(int argc, char *argv[])
 		}
 
         operacion = ntohs(mensaje.operacion);
-        identificador = ntohl(mensaje.id);
+        identificador = ntohl(mensaje.datos);
 
 		// Se crea la ruta del archivo que contendra informacion de la fecha de 
 		// llegada del nuevo carro.
@@ -160,6 +162,7 @@ int main(int argc, char *argv[])
 		sprintf(ident, "%d", identificador);
 		strcat(archivoIdent,"./vehiculos/");
 		strcat(archivoIdent,ident);
+
         if (operacion == entrada){
             op = "e";
         }
@@ -204,12 +207,10 @@ int main(int argc, char *argv[])
 					escibirBitacoraSalida(bitacoraSalida,ident,montoApagar);
 
 					printf("Soy salida\n");
-					mensaje.operacion = pagoCorrecto;
-					mensaje.id = montoApagar;
-					
-				
-					//remove(archivoIdent);
 
+					mensaje.operacion = pagoCorrecto;
+					mensaje.datos = montoApagar;
+					
 
 				}
 				else if (operacion == 0){
@@ -240,6 +241,8 @@ int main(int argc, char *argv[])
 					
 					    }
 
+					    tiempo = (int)tiempoActual;
+	
 					    tiempoEntrada = localtime(&tiempoActual);
 					    // Se crea el archivo del vehiculo
 						crearArchivoVehiculo(archivoIdent,tiempoEntrada);
@@ -249,6 +252,8 @@ int main(int argc, char *argv[])
 
 						// Se arma el mensaje del cliente
 						mensaje.operacion = entradaCorrecta;
+						mensaje.datos = tiempo;
+					    printf("Tiempo unit32_t %d\n",tiempo);
 
 					}
 
@@ -259,11 +264,12 @@ int main(int argc, char *argv[])
 
 			else {
                 mensaje.operacion = errorID;
-                mensaje.operacion = htons(mensaje.operacion);
 
 			}
 
-			printf("Voy a enviar \n");
+            mensaje.operacion = htons(mensaje.operacion);
+            mensaje.datos =  htonl(mensaje.datos);
+
 			if ((numbytes2=sendto(sockfd,&mensaje,sizeof(mensaje),0,
 				(struct sockaddr *)&their_addr, 
 				sizeof(struct sockaddr))) == -1) { 

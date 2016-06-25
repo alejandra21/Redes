@@ -26,9 +26,8 @@ int main(int argc, char *argv[])
 	int sockfd;
 	int addr_len,numbytes,numbytes2; /* conteo de bytes a escribir */ 
 	int numeroIntentos;
-	char *identificador;
-	char *operacion;
-	char recibido[30];
+	char *fecha;
+	time_t tiempoActual;
 	uint16_t entrada = 0;
 	uint16_t salida = 1;
 	uint16_t ack = 2;
@@ -44,7 +43,7 @@ int main(int argc, char *argv[])
 
     struct message{
         uint16_t operacion;
-        uint32_t id;
+        uint32_t datos;
     } mensaje;
 
 	/* code */
@@ -93,7 +92,7 @@ int main(int argc, char *argv[])
 				}
 
 				else if ( strcmp(argv[i],"-i") == 0){
-					mensaje.id = htonl(atoi(argv[i+1]));
+					mensaje.datos = htonl(atoi(argv[i+1]));
 
 				}
 
@@ -129,8 +128,6 @@ int main(int argc, char *argv[])
 	their_addr.sin_port = htons(serverPort); /* usa network byte order */ 
 	their_addr.sin_addr = *((struct in_addr *)direccionDestino->h_addr); 
 	bzero(&(their_addr.sin_zero), 8); /* pone en cero el resto */ 
-
-	printf("mensaje :%d %d \n", mensaje.operacion, mensaje.id);
 	
 	// Se envia el mensaje con toda la informacion del cliente al servidor
 	if ((numbytes=sendto(sockfd,&mensaje,sizeof(mensaje),0,(struct sockaddr *)&their_addr,sizeof(their_addr))) == -1) { 
@@ -146,6 +143,7 @@ int main(int argc, char *argv[])
 	// Si no se recibe algun mensaje del servidor despues de 2 seg se intenta
 	// enviar el mensaje 3 veces mas.
 	numeroIntentos = 1;
+
 	while (numbytes2 == -1 && numeroIntentos <= 3){
 
 		printf("Numero de intentos : %d\n",numeroIntentos);
@@ -169,11 +167,39 @@ int main(int argc, char *argv[])
 	}
 	else{
 
-		recibido[numbytes2] = '\0'; 
-		printf("Mensaje del servidor : %s\n",recibido);
+		if (ntohs(mensaje.operacion) == entradaCorrecta){
+
+			tiempoActual = (time_t)ntohl(mensaje.datos);
+			// Se cambia el formato de la hora
+			fecha = ctime(&tiempoActual);
+
+			if (fecha == NULL){
+				printf("Error cambiando el formato del tiempo.\n");
+				exit(0);
+			
+			}
+
+			// Falta id
+			printf("ID del vehiculo: \nFecha de entrada: %s",fecha);
+
+		}
+		else if (ntohs(mensaje.operacion) == sinPuesto){
+
+			printf("No hay puestos disponibles en el estacionamiento. \n");
+
+		}
+		else if (ntohs(mensaje.operacion) == pagoCorrecto){
+
+			printf("El monto a pagar es de: %d Bs. \n",ntohl(mensaje.datos));
+
+		}
+		else if (ntohs(mensaje.operacion) == errorID){
+
+			printf("Hay un erro con el ID introducido. \n");
+
+		}
 		
 	}
-	printf("Numero de intentos final %d\n",numeroIntentos);
 
 	// Se cierra el socket
 	close(sockfd); 

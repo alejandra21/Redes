@@ -50,6 +50,9 @@ int calcularCosto(char *identificador) {
 	printf("Linea extraida %d : %d \n",horas,minutos);
 	fclose(archivoS);
 
+	remove(identificador);
+
+
 	// Se calcula el tiempo actual.
     tiempoActual = time(NULL);
 
