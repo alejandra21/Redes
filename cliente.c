@@ -185,8 +185,11 @@ int main(int argc, char *argv[])
 			
 			}
 
-			// Falta id
+			printf("----------------------------------------------\n");
+			printf("                   TICKET                     \n");
+			printf("----------------------------------------------\n");
 			printf("ID del vehiculo: %d \nFecha de entrada: %s",id,fecha);
+			printf("----------------------------------------------\n");
 
 		}
 		else if (operacion == sinPuesto){
