@@ -205,7 +205,11 @@ int main(int argc, char *argv[])
 		}
 		else if (operacion == pagoCorrecto){
 
+			printf("----------------------------------------------\n");
+			printf("                MONTO A PAGAR                 \n");
+			printf("----------------------------------------------\n");
 			printf("El monto a pagar es de: %d Bs. \n",datos);
+			printf("----------------------------------------------\n");
 
 		}
 		else if (operacion == errorID){
