@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
 	int sockfd;  // Descriptor del socket
 	int serverPort;
 	int montoApagar;
+	int hayPuesto;
 	int contadorArchivos;
 	int errorIdentificador;
 	int addr_len, numbytes, numbytes2; 
@@ -172,15 +173,21 @@ int main(int argc, char *argv[])
         }
 
 		errorIdentificador = verificarID(archivoIdent,op);
+		hayPuesto = 1; // Hay puesto es igual a TRUE
 
 		// Despues de verificar si existe un erro con el ID se incrementa
 		// o se decrementa el numero de puestos disponibles.
 		if (errorIdentificador == 0 ){
 
-			if (operacion == entrada){
+			if (operacion == entrada && puestosDisponibles > 0){
 
 				puestosDisponibles = puestosDisponibles - 1;
 
+			}
+
+			else if (operacion == entrada && puestosDisponibles == 0){
+
+				hayPuesto = 0;
 			}
 
 			else if (operacion == salida){
@@ -212,9 +219,9 @@ int main(int argc, char *argv[])
 				}
 				else if (operacion == entrada){
 
-
+					printf("Puestos disponibles hijo %d\n",puestosDisponibles);
 					// Se verifica si hay puestos disponibles
-					if (puestosDisponibles < 0){
+					if ( hayPuesto == 0 ){
 
 						mensaje.operacion = sinPuesto;
 
