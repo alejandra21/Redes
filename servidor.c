@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 	char archivoIdent[100];	  
 	struct sockaddr_in my_addr;    //direccion IP y numero de puerto local  
 	struct sockaddr_in their_addr; //direccion IP y numero de puerto del cliente 
-	struct tm *tiempoEntrada;
+
 
     struct message{
         uint16_t operacion;
@@ -219,7 +219,6 @@ int main(int argc, char *argv[])
 				}
 				else if (operacion == entrada){
 
-					printf("Puestos disponibles hijo %d\n",puestosDisponibles);
 					// Se verifica si hay puestos disponibles
 					if ( hayPuesto == 0 ){
 
@@ -245,9 +244,8 @@ int main(int argc, char *argv[])
 					
 					    }
 
-					    tiempoEntrada = localtime(&tiempoActual);
 					    // Se crea el archivo del vehiculo
-						crearArchivoVehiculo(archivoIdent,tiempoEntrada);
+						crearArchivoVehiculo(archivoIdent,tiempoActual);
 
 						// Se escribe en la bitacora de entrada
 						escibirBitacoraEntrada(bitacoraEntrada,ident,fecha);

@@ -19,7 +19,7 @@ int calcularCosto(char *identificador);
 int verificarID(char *archivoIdent,char *operacion);
 void escibirBitacoraEntrada(char *bitacoraEntrada,char *identificador,char *fecha);
 void escibirBitacoraSalida(char *bitacoraSalida,char *identificador,int montoApagar);
-void crearArchivoVehiculo(char *archivoIdent,struct tm* tiempoEntrada);
+void crearArchivoVehiculo(char *archivoIdent,time_t tiempoActual);
 int contarVehiculosEstacionados(char *ruta);
 
 #endif

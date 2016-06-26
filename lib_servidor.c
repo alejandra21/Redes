@@ -49,21 +49,20 @@ int calcularCosto(char *identificador) {
 	*/
 
 	// Declaracion de variables:
-	int dia;
-	int mes;
-	int horas;
-	int minutos;
-	int diasTotales;
-	int mesesTodales;
+
+	int h = 3600;
+	int tiempoEntrada;
+	int tiempoSalida;
+	int tiempoTotal;
 	int horasTotales;
-	int minutosTotales;
 	time_t tiempoActual;
-    struct tm *tiempoSalida;
+	div_t divisorHoras;
+
 	FILE *archivoS;
 
 	// Se abre el archivo y se lee la fecha
 	archivoS = fopen(identificador,"r");
-	fscanf(archivoS," %d %d %d:%d",&dia,&mes,&horas,&minutos);
+	fscanf(archivoS," %d",&tiempoEntrada);
 
 
 	fclose(archivoS);
@@ -81,69 +80,38 @@ int calcularCosto(char *identificador) {
         exit(0);
     }
 
-    // Se resta la fecha del tiempo actual con la fecha del archivo.
-    tiempoSalida = localtime( &tiempoActual);
-    diasTotales = tiempoSalida->tm_mday - dia;
-    mesesTodales = tiempoSalida->tm_mon - mes;
-    horasTotales =  tiempoSalida->tm_hour - horas;
-    minutosTotales = tiempoSalida->tm_min - minutos;
+    printf("Tiempo archivo %d\n",tiempoEntrada);
+    tiempoSalida = (int)tiempoActual;
 
+    printf("Tiempo actual %d\n",tiempoSalida);
+    tiempoTotal = tiempoSalida - tiempoEntrada;
 
-    // Se rectifica la operacion de resta.
-	if (mesesTodales != 0){
+    printf("Resta tiempo %d\n",tiempoTotal);
 
-	    if (diasTotales < 0){
-
-	    	if ( (mes == 0) | (mes == 2) | (mes == 4) | (mes == 6) | (mes == 7) | (mes == 9) | (mes == 11) ) {
-
-	    		diasTotales = 31 + diasTotales;
-	    	}
-
-	    	else if (mes == 1){
-
-	    		diasTotales = 28 + diasTotales;
-	    	}
-
-	    	else{
-	    		diasTotales = 30 + diasTotales;
-	    	}
-	    }
-
-	}
-
-    if (minutosTotales < 0 ){
-    	minutosTotales = 60 + minutosTotales;
-
-    	if (horasTotales != 0){
-    		horasTotales = horasTotales - 1 ;
-    	}
-    	if (diasTotales != 0 ){
-    		diasTotales = diasTotales -1 ;
-    	}
-    }
-
-    if (horasTotales < 0){
-
-    	horasTotales = horasTotales + 24;
-    }
-
-	// Se calcula el monto a pagar
-    if (horasTotales == 0 && diasTotales == 0) {
+    if (tiempoTotal <= h){
 
     	return 80;
     }
+
     else {
 
-    	if (minutosTotales > 0 ) {
+    	// Calculo el numero de horas y minutos
+    	divisorHoras = div(tiempoTotal,h);
+    	horasTotales = divisorHoras.quot;
 
-    		return 80*horasTotales + 24*80*diasTotales + 30;
-    	}
-    	else {
+    	// Si el numero de minutos es mayor que 0
+		if (divisorHoras.rem > 0){
 
-    		return 80*horasTotales + 24*80*diasTotales;
-    	}
+			return horasTotales*80 + 30;
+
+		}
+		else {
+
+			return horasTotales*80;
+		}
+
     }
-
+    	
 }
 
 //----------------------------------------------------------------------------//
@@ -171,7 +139,6 @@ int verificarID(char *archivoIdent,char *operacion){
 		descripcion de lo contrario retorna 0.
 	 
 	*/
-
 
 	if ( ( (access(archivoIdent,F_OK ) != -1) && \
 		(strcmp(operacion,"e")==0) ) || ( (access(archivoIdent,F_OK ) == -1) && \
@@ -255,7 +222,7 @@ void escibirBitacoraSalida(char *bitacoraSalida,char *identificador,int montoApa
 
 //----------------------------------------------------------------------------//
 
-void crearArchivoVehiculo(char *archivoIdent,struct tm* tiempoEntrada){
+void crearArchivoVehiculo(char *archivoIdent,time_t tiempoActual){
 
 
 	/*  Descripcion de la funcion:
@@ -278,12 +245,13 @@ void crearArchivoVehiculo(char *archivoIdent,struct tm* tiempoEntrada){
 
 	// Declaracion de variables:
 	FILE *archivoCarros;
+	int tiempo;
 
+	tiempo = (int)tiempoActual;
 	// Se abre el archivo
 	archivoCarros = fopen(archivoIdent,"w");
 	// Se escribe en el archivo
-	fprintf(archivoCarros,"%d %d %d:%d",tiempoEntrada->tm_mday,tiempoEntrada->tm_mon,
-					tiempoEntrada->tm_hour, tiempoEntrada->tm_min);
+	fprintf(archivoCarros,"%d",tiempo);
 
 	
 	// Se cierra el archivo.
