@@ -44,12 +44,10 @@ int main(int argc, char *argv[])
 	// Tipos de datos
 	uint16_t entrada = 0;
 	uint16_t salida = 1;
-/*	uint16_t ack = 2;
-	uint16_t rr =3;*/
-	uint16_t entradaCorrecta = 4;
-	uint16_t sinPuesto = 5;
-    uint16_t pagoCorrecto = 6;
-    uint16_t errorID = 7;
+	uint16_t entradaCorrecta = 2;
+	uint16_t sinPuesto = 3;
+    uint16_t pagoCorrecto = 4;
+    uint16_t errorID = 5;
 	uint16_t operacion;
 	uint32_t identificador;
 	pid_t childpid;	

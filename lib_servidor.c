@@ -80,13 +80,8 @@ int calcularCosto(char *identificador) {
         exit(0);
     }
 
-    printf("Tiempo archivo %d\n",tiempoEntrada);
     tiempoSalida = (int)tiempoActual;
-
-    printf("Tiempo actual %d\n",tiempoSalida);
     tiempoTotal = tiempoSalida - tiempoEntrada;
-
-    printf("Resta tiempo %d\n",tiempoTotal);
 
     if (tiempoTotal <= h){
 
