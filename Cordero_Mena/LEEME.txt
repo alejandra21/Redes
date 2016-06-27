@@ -1,0 +1,91 @@
+ Universidad Simón Bolívar
+ Departamento de Computación y Tecnología de la Información
+ Redes de computadoras I (CI)
+ 
+
+Integrantes:
+ 	Alejandra Cordero / 12-10645
+	Pablo Maldonado / 12-10561
+
+
+DESCRIPCION DEL PROGRAMA:
+
+		Los programas presentados representan un sistema informatico basado en el paradigma 
+	cliente/servidor que permite controlar el acceso y la salida de los vehiculos que hacen 
+	uso de estacionamiento del Centro Comercial Moriah.
+
+		Si un vehiculo requiere entrar entonces hara uso de una de las puertas del 
+	estacionamiento (cliente) y esta a su vez enviará una solicitud al servidor. Si hay puestos
+	disponibles el servidor enviara la información pertinente al cliente para que este le imprima
+	el ticket al vehículo que quiere entrar. Si no hay puesto entonces el servidor enviara un mensaje 
+	al cliente informando que no hay puestos disponibles.
+
+		Por otra parte, si un vehiculo estacionado quiere salir de igual, manera hara uso del cliente 
+	del sistema. El cliente enviará una solicitud de salida al servidor,el servidor calculará el monto 
+	que deberá pagar el vehículo y se lo enviará al cliente y este por su parte imprimira el ticket.
+
+ARCHIVOS DE LA ENTREGA:
+
+	- servidor.c: 
+
+		Implementacion del servidor del estacinamiento.
+
+	- cliente.c: 
+
+		Implementacion del cliete del estacionamiento.
+
+	- lib_servidor.c: 
+
+		Libreria utilizada por el servidor.
+
+	- lib_servidor.h:
+
+		Cabecera de la libreria implementada.
+
+	- Makefile: 
+
+		Makefile del proyecto. Las acciones disponibles son:
+
+			* make all : crea los ejecutables del servidor y el cliente.
+			* make clean : limpia los ejecutables del servidor y el cliente.
+
+INSTRUCCIONES DE EJECUCION
+
+	Para compilar el programa debera realizar los siguientes pasos:
+
+	1 - Dirijase al directorio en donde esten todos los archivos que se mencionaron
+		en la seccion "ARCHIVOS DE LA ENTREGA" a traves de la consola.
+
+	2 - Una vez en el directorio que contenga todos los archivos escriba lo siguiente 
+		en la consola (sin incluir el $):
+
+		$ make
+
+	3 - El comando anterior genera dos ejecutables: sem_cli (cliente) y sem_srv (servidor) 
+
+
+	Para ejecutar el cliente realice los siguientes pasos:
+
+	1- En el mismo directorio en donde se encuentre el ejecutable sem_cli escriba en la 
+		consola:
+
+		$ sem_cli -d <ip del servidor>  -p <puerto de la aplicacion> -c <operacion> -i <identificador del vehiculo>
+
+		<operacion> puede ser unicamente 'e' (entrada) o 's' (salida)
+
+		Nota : Los flags no tienen que estar estrictamente en el mismo orden. 
+
+	Para ejecutar el servidor realice los siguientes pasos
+
+	1- En el mismo directorio en donde se encuentre el ejecutable sem_srv escriba en la 
+		consola:
+
+		$ sem_srv -l <puerto de la aplicacion> -i <bitacora de entrada> -o <bitacora de salida>
+
+		Nota : Los flags no tienen que estar estrictamente en el mismo orden. 
+
+
+
+CIERTAS CONDICIONES
+
+	1 - El rango de identificadores que puede poseer un vehiculo va del 0 al 429496725
