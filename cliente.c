@@ -37,12 +37,10 @@ int main(int argc, char *argv[])
 	// Tipos de datos
 	uint16_t entrada = 0;
 	uint16_t salida = 1;
-/*	uint16_t ack = 2;
-	uint16_t rr =3;*/
-	uint16_t entradaCorrecta = 4;
-	uint16_t sinPuesto = 5;
-    uint16_t pagoCorrecto = 6;
-    uint16_t errorID = 7;
+	uint16_t entradaCorrecta = 2;
+	uint16_t sinPuesto = 3;
+    uint16_t pagoCorrecto = 4;
+    uint16_t errorID = 5;
 
     // Estructuras
 	struct sockaddr_in their_addr; 
@@ -140,19 +138,20 @@ int main(int argc, char *argv[])
 	bzero(&(their_addr.sin_zero), 8); 
 	
 	printf("Enviando informacion al servidor ...\n");
+
+
 	// Se envia el mensaje con toda la informacion del cliente al servidor
 	if ((numbytes=sendto(sockfd,&mensaje,sizeof(mensaje),0,(struct sockaddr *)&their_addr,sizeof(their_addr))) == -1) { 
 		perror("Error en la funcion sendto:"); 
 		exit(2); 
 	} 
 
-
 	// Se espera el mensaje del servidor.
 	numbytes2 = recvfrom(sockfd,&mensaje,30,0, (struct sockaddr *)&their_addr,
 		(socklen_t *)&addr_len);
 
 	// Si no se recibe algun mensaje del servidor despues de 2 seg se intenta
-	// enviar el mensaje 3 veces mas.
+	// enviar el mensaje 2 veces mas.
 	numeroIntentos = 1;
 
 	while (numbytes2 == -1 && numeroIntentos <= 3){
